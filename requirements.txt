@@ -1,0 +1,5 @@
+flake8
+marshmallow>=2.0.0b5
+pytest
+tox
+coverage
