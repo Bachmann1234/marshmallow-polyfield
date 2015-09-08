@@ -12,7 +12,7 @@ Marshmallow-Polyfield
     :target: https://coveralls.io/github/Bachmann1234/marshmallow-polyfield?branch=master
     :alt: Coverage Status
 
-An unoffical extension to Marshmallow to allow for polymorphic fields.
+An unofficial extension to Marshmallow to allow for polymorphic fields.
 
 Marshmallow is a fantastic library for serialization and deserialization of data.
 For more on that project see its `GitHub <https://github.com/marshmallow-code/marshmallow>`_ page or its `Documentation <http://marshmallow.readthedocs.org/en/latest/>`_.
@@ -22,11 +22,9 @@ This project adds a custom field designed for polymorphic types. This allows you
 The secret to this field is that you need to define two functions. One to be used when serializing, and another for deserializing. These functions
 take in the raw value and return the schema to use.
 
-An example can be seen in `tests/shapes.py` in `shape_schema_disambiguation`
+This field should support the same properties as other Marshmallow fields. I have worked with *required* *allow_none* and *many*.
 
-This field should support the same properties as other Marshmallow fields. I have worked with `required` `allow_none` and `many`.
-
-Below is an example schema using this field.
+Below is an example. For the full context check out the tests.
 
 
 .. code:: python
