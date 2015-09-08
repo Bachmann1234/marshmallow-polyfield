@@ -4,21 +4,31 @@ from marshmallow.fields import Field
 
 class PolyField(Field):
     """
-    A field that (de)serializes to one of many types. a function
-    is called to disambiguate what schema to use for the (de)serialization
+    A field that (de)serializes to one of many types. Passed in functions
+    are called to disambiguate what schema to use for the (de)serialization
     Intended to assist in working with fields that can contain any subclass
     of a base type
     """
-    def __init__(self, disambiguation_function, many=False, **metadata):
+    def __init__(
+            self,
+            serialization_schema_selector=None,
+            deserialization_schema_selector=None,
+            many=False,
+            **metadata
+    ):
         """
-        :param disambiguation_function: Function that takes in either
-        an object or a dict representing that object
+        :param serialization_schema_selector: Function that takes in either
+        an object representing that object
+        and returns the appropriate schema
+        :param deserialization_schema_selector: Function that takes in either
+        an a dict representing that object
         and returns the appropriate schema
 
         """
         super(PolyField, self).__init__(**metadata)
         self.many = many
-        self.disambiguation_function = disambiguation_function
+        self.serialization_schema_selector = serialization_schema_selector
+        self.deserialization_schema_selector = deserialization_schema_selector
 
     def _deserialize(self, value):
         if not self.many:
@@ -27,11 +37,12 @@ class PolyField(Field):
         results = []
         for v in value:
             try:
-                schema = self.disambiguation_function(v)
+                schema = self.deserialization_schema_selector(v)
                 data, errors = schema.load(v)
             except TypeError:
                 raise ValidationError(
-                    "Unable to use schema. Did the disambiguation function return one?"
+                    "Unable to use schema. Ensure there is a deserialization_schema_selector"
+                    "and that it returned a schema when passed in {0}".format(v)
                 )
             if errors:
                 raise ValidationError(errors)
@@ -46,11 +57,12 @@ class PolyField(Field):
     def _serialize(self, value, key, obj):
         try:
             if self.many:
-                return [self.disambiguation_function(v).dump(v).data for v in value]
+                return [self.serialization_schema_selector(v).dump(v).data for v in value]
             else:
-                return self.disambiguation_function(value).dump(value).data
+                return self.serialization_schema_selector(value).dump(value).data
         except Exception as err:
             raise TypeError(
                 'Failed to serialize object. Error: {0}\n'
-                ' Ensure the selection function returns a Schema and that schema'
+                ' Ensure the serialization_schema_selector exists and '
+                ' returns a Schema and that schema'
                 ' can serialize this value {1}'.format(err, value))

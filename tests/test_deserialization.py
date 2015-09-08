@@ -1,7 +1,12 @@
 from marshmallow import Schema, ValidationError
 from marshmallow_polyfield.polyfield import PolyField
 import pytest
-from tests.shapes import shape_schema_disambiguation, Rectangle, Triangle
+from tests.shapes import (
+    shape_schema_serialization_disambiguation,
+    Rectangle,
+    Triangle,
+    shape_schema_deserialization_disambiguation
+)
 
 
 class TestPolyField(object):
@@ -15,8 +20,17 @@ class TestPolyField(object):
             return self.__dict__ == other.__dict__
 
     class ContrivedShapeClassSchema(Schema):
-        main = PolyField(shape_schema_disambiguation, required=True)
-        others = PolyField(shape_schema_disambiguation, allow_none=True, many=True)
+        main = PolyField(
+            serialization_schema_selector=shape_schema_serialization_disambiguation,
+            deserialization_schema_selector=shape_schema_deserialization_disambiguation,
+            required=True
+        )
+        others = PolyField(
+            serialization_schema_selector=shape_schema_serialization_disambiguation,
+            deserialization_schema_selector=shape_schema_deserialization_disambiguation,
+            allow_none=True,
+            many=True
+        )
 
         def make_object(self, data):
             return TestPolyField.ContrivedShapeClass(

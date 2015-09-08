@@ -11,7 +11,7 @@ def read(fname):
 setup(
     name='marshmallow-polyfield',
     version=1.0,
-    description='An extension to marshmallow to allow for polymorphic fields',
+    description='An unoffical extension to Marshmallow to allow for polymorphic fields',
     long_description=read('README.md'),
     author='Matt Bachmann',
     author_email='bachmann.matt@gmail.com',

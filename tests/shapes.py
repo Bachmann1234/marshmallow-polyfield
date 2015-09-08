@@ -52,23 +52,26 @@ class RectangleSchema(ShapeSchema):
         )
 
 
-def shape_schema_disambiguation(value):
+def shape_schema_serialization_disambiguation(base_object):
     class_to_schema = {
         Rectangle.__name__: RectangleSchema,
         Triangle.__name__: TriangleSchema
     }
     try:
-        return class_to_schema[value.__class__.__name__]()
+        return class_to_schema[base_object.__class__.__name__]()
     except KeyError:
         pass
 
-    try:
-        if value.get("base"):
-            return TriangleSchema()
-        elif value.get("length"):
-            return RectangleSchema()
-    except AttributeError:
-        pass
+    raise TypeError("Could not detect type. "
+                    "Did not have a base or a length. "
+                    "Are you sure this is a shape?")
+
+
+def shape_schema_deserialization_disambiguation(object_dict):
+    if object_dict.get("base"):
+        return TriangleSchema()
+    elif object_dict.get("length"):
+        return RectangleSchema()
 
     raise TypeError("Could not detect type. "
                     "Did not have a base or a length. "
