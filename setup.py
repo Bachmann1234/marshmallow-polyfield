@@ -12,7 +12,7 @@ setup(
     name='marshmallow-polyfield',
     version=2.1,
     description='An unoffical extension to Marshmallow to allow for polymorphic fields',
-    long_description=read('README.md'),
+    long_description=read('README.rst'),
     author='Matt Bachmann',
     author_email='bachmann.matt@gmail.com',
     url='https://github.com/Bachmann1234/marshmallow-polyfield',
