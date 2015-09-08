@@ -51,6 +51,6 @@ class PolyField(Field):
                 return self.disambiguation_function(value).dump(value).data
         except Exception as err:
             raise TypeError(
-                'Failed to serialize object. Error: {}\n'
+                'Failed to serialize object. Error: {0}\n'
                 ' Ensure the selection function returns a Schema and that schema'
-                ' can serialize this value {}'.format(err, value))
+                ' can serialize this value {1}'.format(err, value))
