@@ -47,16 +47,15 @@ def test_serializing_polyfield_rectangle():
 
 
 def test_serializing_polyfield_None():
-    rect = Rectangle(None, 4, 10)
     Sticker = namedtuple('Sticker', ['shape', 'image'])
-    marshmallow_sticker = Sticker(rect, "marshmallow.png")
+    marshmallow_sticker = Sticker(None, "marshmallow.png")
     field = PolyField(
         serialization_schema_selector=shape_schema_serialization_disambiguation,
         deserialization_schema_selector=shape_schema_deserialization_disambiguation
     )
     rect_dict = field.serialize('shape', marshmallow_sticker)
 
-    assert rect_dict == {"length": 4, "width": 10, "color": None}
+    assert rect_dict is None
 
 
 def test_serializing_polyfield_many():
@@ -84,4 +83,4 @@ def test_invalid_polyfield():
             serialization_schema_selector=shape_schema_serialization_disambiguation,
             deserialization_schema_selector=shape_schema_deserialization_disambiguation
         )
-        field.serialize('shape', Sticker(None, None))
+        field.serialize('shape', Sticker(3, 3))

@@ -55,6 +55,8 @@ class PolyField(Field):
             return results[0]
 
     def _serialize(self, value, key, obj):
+        if value is None:
+            return None
         try:
             if self.many:
                 return [self.serialization_schema_selector(v).dump(v).data for v in value]
