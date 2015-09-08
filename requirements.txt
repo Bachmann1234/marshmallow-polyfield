@@ -4,3 +4,4 @@ pytest
 tox
 coverage
 coveralls
+pytest-cov
