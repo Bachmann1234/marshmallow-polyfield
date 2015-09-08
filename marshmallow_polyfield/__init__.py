@@ -1,1 +1,1 @@
-from polyfield import PolyField
+from polyfield import PolyField  # noqa
