@@ -19,3 +19,5 @@ before_script:
   - flake8 .
 
 script: py.test tests
+
+after_success: coveralls
