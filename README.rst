@@ -24,11 +24,27 @@ take in the raw value and return the schema to use.
 
 This field should support the same properties as other Marshmallow fields. I have worked with *required* *allow_none* and *many*.
 
-Below is an example. For the full context check out the tests.
+Installing
+----------
+::
 
+    $ pip install marshmallow-polyfield
+
+Importing
+---------
+Here is how to import the necessary field class 
+::
+
+    from marshmallow_polyfield import PolyField
+
+Example
+-------
+
+The code below demonstrates how to setup a schema with a PolyField. For the full context check out the tests.
+Once setup the schema should act like any other schema. If it does not then please file an Issue.
 
 .. code:: python
-
+  
     def shape_schema_serialization_disambiguation(base_object):
         class_to_schema = {
             Rectangle.__name__: RectangleSchema,
