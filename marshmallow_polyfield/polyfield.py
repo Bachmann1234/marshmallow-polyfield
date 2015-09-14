@@ -30,7 +30,7 @@ class PolyField(Field):
         self.serialization_schema_selector = serialization_schema_selector
         self.deserialization_schema_selector = deserialization_schema_selector
 
-    def _deserialize(self, value):
+    def _deserialize(self, value, *args, **kwargs):
         if not self.many:
             value = [value]
 
