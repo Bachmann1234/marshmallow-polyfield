@@ -9,7 +9,24 @@ from tests.shapes import (
 )
 
 
+def _bad_deserializer_disambiguation(self):
+        return 1
+
+
 class TestPolyField(object):
+
+    class BadContrivedClassSchema(Schema):
+        main = PolyField(
+            serialization_schema_selector=_bad_deserializer_disambiguation,
+            deserialization_schema_selector=_bad_deserializer_disambiguation,
+            required=True
+        )
+        others = PolyField(
+            serialization_schema_selector=_bad_deserializer_disambiguation,
+            deserialization_schema_selector=_bad_deserializer_disambiguation,
+            allow_none=True,
+            many=True
+        )
 
     class ContrivedShapeClass(object):
         def __init__(self, main, others):
@@ -84,6 +101,13 @@ class TestPolyField(object):
     def test_deserialize_polyfield_invalid(self):
         with pytest.raises(ValidationError):
             self.ContrivedShapeClassSchema(strict=True).load(
+                {'main': {'color': 'blue', 'something': 4},
+                 'others': None}
+            )
+
+    def test_deserialize_polyfield_invalid_schema_returned_is_invalid(self):
+        with pytest.raises(ValidationError):
+            self.BadContrivedClassSchema(strict=True).load(
                 {'main': {'color': 'blue', 'something': 4},
                  'others': None}
             )
