@@ -36,13 +36,22 @@ class PolyField(Field):
 
         results = []
         for v in value:
+            schema = None
             try:
                 schema = self.deserialization_schema_selector(v)
                 data, errors = schema.load(v)
-            except TypeError:
+            except Exception:
+                schema_message = None
+                if schema:
+                    schema_message = str(type(schema))
+
                 raise ValidationError(
                     "Unable to use schema. Ensure there is a deserialization_schema_selector"
-                    "and that it returned a schema when passed in {0}".format(v)
+                    " and that it returns a schema when the function is passed in {value_passed}."
+                    " This is the class I got. Make sure it is a schema: {class_type}".format(
+                        value_passed=v,
+                        class_type=schema_message
+                    )
                 )
             if errors:
                 raise ValidationError(errors)
