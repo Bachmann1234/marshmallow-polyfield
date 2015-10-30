@@ -1,7 +1,7 @@
 coverage>=3.7.1
 coveralls>=0.5
 flake8>=2.4.1
-marshmallow>=2.0.0b5
+git+ssh://git@github.com/bachmann1234/marshmallow.git@marshmallow2
 pytest>=2.7.2
 pytest-cov>=2.1.0
 tox>=2.1.1

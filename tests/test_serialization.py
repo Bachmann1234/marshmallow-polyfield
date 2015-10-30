@@ -1,5 +1,5 @@
 from collections import namedtuple
-from marshmallow import fields, Schema
+from marshmallow2 import fields, Schema
 from marshmallow_polyfield.polyfield import PolyField
 import pytest
 from tests.shapes import (

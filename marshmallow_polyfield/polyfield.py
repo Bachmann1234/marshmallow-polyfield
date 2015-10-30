@@ -1,5 +1,5 @@
-from marshmallow import ValidationError
-from marshmallow.fields import Field
+from marshmallow2 import ValidationError
+from marshmallow2.fields import Field
 
 
 class PolyField(Field):
