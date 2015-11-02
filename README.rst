@@ -91,6 +91,7 @@ Once setup the schema should act like any other schema. If it does not then plea
             allow_none=True,
             many=True
         )
+        @post_load
         def make_object(self, data):
             return TestPolyField.ContrivedShapeClass(
                 data.get('main'),

@@ -1,4 +1,4 @@
-from marshmallow import Schema, ValidationError
+from marshmallow import Schema, ValidationError, post_load
 from marshmallow_polyfield.polyfield import PolyField
 import pytest
 from tests.shapes import (
@@ -49,6 +49,7 @@ class TestPolyField(object):
             many=True
         )
 
+        @post_load
         def make_object(self, data):
             return TestPolyField.ContrivedShapeClass(
                 data.get('main'),

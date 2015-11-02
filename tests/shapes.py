@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, post_load
 
 
 class Shape(object):
@@ -25,6 +25,7 @@ class TriangleSchema(ShapeSchema):
     base = fields.Int(required=True)
     height = fields.Int(required=True)
 
+    @post_load
     def make_object(self, data):
         return Triangle(
             color=data['color'],
@@ -44,6 +45,7 @@ class RectangleSchema(ShapeSchema):
     length = fields.Int(required=True)
     width = fields.Int(required=True)
 
+    @post_load
     def make_object(self, data):
         return Rectangle(
             color=data['color'],
