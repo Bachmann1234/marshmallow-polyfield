@@ -9,7 +9,7 @@ from tests.shapes import (
 )
 
 
-def _bad_deserializer_disambiguation(self):
+def _bad_deserializer_disambiguation(self, _):
         return 1
 
 

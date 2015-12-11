@@ -30,7 +30,7 @@ class PolyField(Field):
         self.serialization_schema_selector = serialization_schema_selector
         self.deserialization_schema_selector = deserialization_schema_selector
 
-    def _deserialize(self, value, *args, **kwargs):
+    def _deserialize(self, value, obj_data, *args, **kwargs):
         if not self.many:
             value = [value]
 
@@ -38,7 +38,7 @@ class PolyField(Field):
         for v in value:
             schema = None
             try:
-                schema = self.deserialization_schema_selector(v)
+                schema = self.deserialization_schema_selector(v, obj_data)
                 data, errors = schema.load(v)
             except Exception:
                 schema_message = None
@@ -68,9 +68,9 @@ class PolyField(Field):
             return None
         try:
             if self.many:
-                return [self.serialization_schema_selector(v).dump(v).data for v in value]
+                return [self.serialization_schema_selector(v, obj).dump(v).data for v in value]
             else:
-                return self.serialization_schema_selector(value).dump(value).data
+                return self.serialization_schema_selector(value, obj).dump(value).data
         except Exception as err:
             raise TypeError(
                 'Failed to serialize object. Error: {0}\n'

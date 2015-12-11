@@ -54,7 +54,7 @@ class RectangleSchema(ShapeSchema):
         )
 
 
-def shape_schema_serialization_disambiguation(base_object):
+def shape_schema_serialization_disambiguation(base_object, _):
     class_to_schema = {
         Rectangle.__name__: RectangleSchema,
         Triangle.__name__: TriangleSchema
@@ -69,7 +69,7 @@ def shape_schema_serialization_disambiguation(base_object):
                     "Are you sure this is a shape?")
 
 
-def shape_schema_deserialization_disambiguation(object_dict):
+def shape_schema_deserialization_disambiguation(object_dict, _):
     if object_dict.get("base"):
         return TriangleSchema()
     elif object_dict.get("length"):
