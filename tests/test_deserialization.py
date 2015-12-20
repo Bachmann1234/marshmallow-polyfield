@@ -1,11 +1,13 @@
-from marshmallow import Schema, ValidationError, post_load
+from marshmallow import Schema, ValidationError, post_load, fields
 from marshmallow_polyfield.polyfield import PolyField
 import pytest
 from tests.shapes import (
-    shape_schema_serialization_disambiguation,
     Rectangle,
     Triangle,
-    shape_schema_deserialization_disambiguation
+    shape_schema_serialization_disambiguation,
+    shape_property_schema_serialization_disambiguation,
+    shape_schema_deserialization_disambiguation,
+    shape_property_schema_deserialization_disambiguation
 )
 
 
@@ -119,3 +121,56 @@ class TestPolyField(object):
              'others': None}
         )
         assert errors
+
+
+class TestPolyFieldDisambiguationByProperty(object):
+
+    class ContrivedShapeClass(object):
+        def __init__(self, main, others, type):
+            self.main = main
+            self.others = others
+            self.type = type
+
+        def __eq__(self, other):
+            return self.__dict__ == other.__dict__
+
+    class ContrivedShapeClassSchema(Schema):
+        main = PolyField(
+            serialization_schema_selector=shape_property_schema_serialization_disambiguation,
+            deserialization_schema_selector=shape_property_schema_deserialization_disambiguation,
+            required=True
+        )
+        others = PolyField(
+            serialization_schema_selector=shape_property_schema_serialization_disambiguation,
+            deserialization_schema_selector=shape_property_schema_deserialization_disambiguation,
+            allow_none=True,
+            many=True
+        )
+        type = fields.String(required=True)
+
+        @post_load
+        def make_object(self, data):
+            return TestPolyFieldDisambiguationByProperty.ContrivedShapeClass(
+                data.get('main'),
+                data.get('others'),
+                data.get('type')
+            )
+
+    def test_deserialize_polyfield(self):
+        original = self.ContrivedShapeClass(
+            Rectangle('blue', 1, 100),
+            [Rectangle('pink', 4, 93)],
+            'rectangle'
+        )
+
+        data, errors = self.ContrivedShapeClassSchema(strict=True).load(
+            {'main': {'color': 'blue',
+                      'length': 1,
+                      'width': 100},
+             'others': [{'color': 'pink',
+                         'length': 4,
+                         'width': 93}],
+             'type': 'rectangle'}
+        )
+        assert not errors
+        assert data == original
