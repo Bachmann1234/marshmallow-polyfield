@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name='marshmallow-polyfield',
-    version=2.7,
+    version=3.0,
     description='An unofficial extension to Marshmallow to allow for polymorphic fields',
     long_description=read('README.rst'),
     author='Matt Bachmann',
