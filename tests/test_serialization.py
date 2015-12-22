@@ -3,10 +3,12 @@ from marshmallow import fields, Schema
 from marshmallow_polyfield.polyfield import PolyField
 import pytest
 from tests.shapes import (
-    shape_schema_serialization_disambiguation,
     Rectangle,
     Triangle,
-    shape_schema_deserialization_disambiguation
+    shape_schema_serialization_disambiguation,
+    shape_property_schema_serialization_disambiguation,
+    shape_schema_deserialization_disambiguation,
+    shape_property_schema_deserialization_disambiguation
 )
 
 
@@ -84,3 +86,16 @@ def test_invalid_polyfield():
             deserialization_schema_selector=shape_schema_deserialization_disambiguation
         )
         field.serialize('shape', Sticker(3, 3))
+
+
+def test_serializing_polyfield_by_parent_type():
+    rect = Rectangle("blue", 4, 10)
+    Sticker = namedtuple('Sticker', ['shape', 'image', 'type'])
+    marshmallow_sticker = Sticker(rect, "marshmallow.png", 'rectangle')
+    field = PolyField(
+        serialization_schema_selector=shape_property_schema_serialization_disambiguation,
+        deserialization_schema_selector=shape_property_schema_deserialization_disambiguation
+    )
+    rect_dict = field.serialize('shape', marshmallow_sticker)
+
+    assert rect_dict == {"length": 4, "width": 10, "color": "blue"}

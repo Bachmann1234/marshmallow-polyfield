@@ -18,10 +18,10 @@ class PolyField(Field):
     ):
         """
         :param serialization_schema_selector: Function that takes in either
-        an object representing that object
-        and returns the appropriate schema
+        an object representing that object, it's parent object
+        and returns the appropriate schema.
         :param deserialization_schema_selector: Function that takes in either
-        an a dict representing that object
+        an a dict representing that object, dict representing it's parent dict
         and returns the appropriate schema
 
         """
@@ -30,7 +30,7 @@ class PolyField(Field):
         self.serialization_schema_selector = serialization_schema_selector
         self.deserialization_schema_selector = deserialization_schema_selector
 
-    def _deserialize(self, value, *args, **kwargs):
+    def _deserialize(self, value, attr, data):
         if not self.many:
             value = [value]
 
@@ -38,7 +38,7 @@ class PolyField(Field):
         for v in value:
             schema = None
             try:
-                schema = self.deserialization_schema_selector(v)
+                schema = self.deserialization_schema_selector(v, data)
                 data, errors = schema.load(v)
             except Exception:
                 schema_message = None
@@ -68,9 +68,9 @@ class PolyField(Field):
             return None
         try:
             if self.many:
-                return [self.serialization_schema_selector(v).dump(v).data for v in value]
+                return [self.serialization_schema_selector(v, obj).dump(v).data for v in value]
             else:
-                return self.serialization_schema_selector(value).dump(value).data
+                return self.serialization_schema_selector(value, obj).dump(value).data
         except Exception as err:
             raise TypeError(
                 'Failed to serialize object. Error: {0}\n'

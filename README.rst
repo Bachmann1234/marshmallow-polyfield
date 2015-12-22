@@ -32,7 +32,7 @@ Installing
 
 Importing
 ---------
-Here is how to import the necessary field class 
+Here is how to import the necessary field class
 ::
 
     from marshmallow_polyfield import PolyField
@@ -44,8 +44,8 @@ The code below demonstrates how to setup a schema with a PolyField. For the full
 Once setup the schema should act like any other schema. If it does not then please file an Issue.
 
 .. code:: python
-  
-    def shape_schema_serialization_disambiguation(base_object):
+
+    def shape_schema_serialization_disambiguation(base_object, parent_obj):
         class_to_schema = {
             Rectangle.__name__: RectangleSchema,
             Triangle.__name__: TriangleSchema
@@ -60,7 +60,7 @@ Once setup the schema should act like any other schema. If it does not then plea
                         "Are you sure this is a shape?")
 
 
-    def shape_schema_deserialization_disambiguation(object_dict):
+    def shape_schema_deserialization_disambiguation(object_dict, parent_object_dict):
         if object_dict.get("base"):
             return TriangleSchema()
         elif object_dict.get("length"):
@@ -69,6 +69,7 @@ Once setup the schema should act like any other schema. If it does not then plea
         raise TypeError("Could not detect type. "
                         "Did not have a base or a length. "
                         "Are you sure this is a shape?")
+
 
     class ContrivedShapeClass(object):
         def __init__(self, main, others):
@@ -91,6 +92,7 @@ Once setup the schema should act like any other schema. If it does not then plea
             allow_none=True,
             many=True
         )
+
         @post_load
         def make_object(self, data):
             return TestPolyField.ContrivedShapeClass(
