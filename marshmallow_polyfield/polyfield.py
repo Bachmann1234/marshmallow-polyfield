@@ -39,7 +39,7 @@ class PolyField(Field):
             schema = None
             try:
                 schema = self.deserialization_schema_selector(v, data)
-                data, errors = schema.load(v)
+                assert hasattr(schema, 'load')
             except Exception:
                 schema_message = None
                 if schema:
@@ -53,6 +53,7 @@ class PolyField(Field):
                         class_type=schema_message
                     )
                 )
+            data, errors = schema.load(v)
             if errors:
                 raise ValidationError(errors)
             results.append(data)
