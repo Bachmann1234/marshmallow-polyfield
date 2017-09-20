@@ -53,6 +53,7 @@ class PolyField(Field):
                         class_type=schema_message
                     )
                 )
+            schema.context.update(getattr(self, 'context', {}))
             data, errors = schema.load(v)
             if errors:
                 raise ValidationError(errors)
@@ -69,9 +70,16 @@ class PolyField(Field):
             return None
         try:
             if self.many:
-                return [self.serialization_schema_selector(v, obj).dump(v).data for v in value]
+                res = []
+                for v in value:
+                    schema = self.serialization_schema_selector(v, obj)
+                    schema.context.update(getattr(self, 'context', {}))
+                    res.append(schema.dump(v).data)
+                return res
             else:
-                return self.serialization_schema_selector(value, obj).dump(value).data
+                schema = self.serialization_schema_selector(value, obj)
+                schema.context.update(getattr(self, 'context', {}))
+                return schema.dump(value).data
         except Exception as err:
             raise TypeError(
                 'Failed to serialize object. Error: {0}\n'
