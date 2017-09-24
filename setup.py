@@ -8,6 +8,7 @@ def read(fname):
         content = infile.read()
     return content
 
+
 setup(
     name='marshmallow-polyfield',
     version=3.1,
