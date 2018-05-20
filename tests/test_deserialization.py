@@ -1,9 +1,4 @@
 from marshmallow import Schema, ValidationError, post_load, fields
-try:
-    from marshmallow import UnmarshalResult  # NOQA
-    MARSHMALLOW_3 = False
-except ImportError:
-    MARSHMALLOW_3 = True
 from marshmallow_polyfield.polyfield import PolyField
 import pytest
 from tests.shapes import (
@@ -69,7 +64,7 @@ class TestPolyField(object):
             [Rectangle('pink', 4, 93), Triangle('red', 8, 45)]
         )
 
-        load_result = self.ContrivedShapeClassSchema().load(
+        data = self.ContrivedShapeClassSchema().load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
@@ -81,11 +76,6 @@ class TestPolyField(object):
                   'base': 8,
                   'height': 45}]}
         )
-        if MARSHMALLOW_3:
-            data = load_result
-        else:
-            data, errors = load_result
-
         assert data == original
 
     def test_deserialize_polyfield_none(self):
@@ -94,64 +84,42 @@ class TestPolyField(object):
             None
         )
 
-        load_result = self.ContrivedShapeClassSchema().load(
+        data = self.ContrivedShapeClassSchema().load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
              'others': None}
         )
 
-        if MARSHMALLOW_3:
-            data = load_result
-        else:
-            data, errors = load_result
-
         assert data == original
 
     def test_deserailize_polyfield_none_required(self):
 
-        kwargs = {}
-        if not MARSHMALLOW_3:
-            kwargs = {'strict': True}
-
         with pytest.raises(ValidationError):
-            self.ContrivedShapeClassSchema(**kwargs).load(
+            self.ContrivedShapeClassSchema().load(
                 {'main': None,
                  'others': None}
             )
 
     def test_deserialize_polyfield_invalid(self):
-
-        kwargs = {}
-        if not MARSHMALLOW_3:
-            kwargs = {'strict': True}
-
         with pytest.raises(ValidationError):
-            self.ContrivedShapeClassSchema(**kwargs).load(
+            self.ContrivedShapeClassSchema().load(
                 {'main': {'color': 'blue', 'something': 4},
                  'others': None}
             )
 
     def test_deserialize_polyfield_invalid_schema_returned_is_invalid(self):
 
-        kwargs = {}
-        if not MARSHMALLOW_3:
-            kwargs = {'strict': True}
-
         with pytest.raises(ValidationError):
-            self.BadContrivedClassSchema(**kwargs).load(
+            self.BadContrivedClassSchema().load(
                 {'main': {'color': 'blue', 'something': 4},
                  'others': None}
             )
 
     def test_deserialize_polyfield_errors(self):
 
-        kwargs = {}
-        if not MARSHMALLOW_3:
-            kwargs = {'strict': True}
-
         with pytest.raises(ValidationError):
-            self.ContrivedShapeClassSchema(**kwargs).load(
+            self.ContrivedShapeClassSchema().load(
                 {'main': {'color': 'blue', 'length': 'four', 'width': 4},
                  'others': None}
             )
@@ -197,7 +165,7 @@ class TestPolyFieldDisambiguationByProperty(object):
             'rectangle'
         )
 
-        load_result = self.ContrivedShapeClassSchema().load(
+        data = self.ContrivedShapeClassSchema().load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
@@ -206,10 +174,5 @@ class TestPolyFieldDisambiguationByProperty(object):
                          'width': 93}],
              'type': 'rectangle'}
         )
-
-        if MARSHMALLOW_3:
-            data = load_result
-        else:
-            data, errors = load_result
 
         assert data == original
