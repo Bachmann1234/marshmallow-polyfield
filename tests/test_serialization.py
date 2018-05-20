@@ -1,5 +1,11 @@
 from collections import namedtuple
 from marshmallow import fields, Schema
+try:
+    from marshmallow import UnmarshalResult  # NOQA
+    MARSHMALLOW_3 = False
+except ImportError:
+    MARSHMALLOW_3 = True
+
 from marshmallow_polyfield.polyfield import PolyField
 import pytest
 from tests.shapes import (
@@ -31,8 +37,15 @@ def test_serializing_named_tuple_with_meta():
             fields = ('x', 'y')
 
     serialized = PointSerializer().dump(p)
-    assert serialized.data['x'] == 4
-    assert serialized.data['y'] == 2
+    try:
+        assert serialized.data['x'] == 4
+    except AttributeError:
+        assert serialized['x'] == 4
+
+    try:
+        assert serialized.data['y'] == 2
+    except AttributeError:
+        assert serialized['y'] == 2
 
 
 def test_serializing_polyfield_rectangle():

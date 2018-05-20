@@ -99,7 +99,7 @@ class PolyField(Field):
             else:
                 schema = self.serialization_schema_selector(value, obj)
                 schema.context.update(getattr(self, 'context', {}))
-                dump_result = schema.dump(v)
+                dump_result = schema.dump(value)
                 if MARSHMALLOW_3:
                     return dump_result
                 else:
