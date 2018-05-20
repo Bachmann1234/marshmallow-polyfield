@@ -1,10 +1,4 @@
 from marshmallow import ValidationError
-try:
-    # UnmarshalResult not present in >=3.0.0, so use to flag marshmallow version
-    from marshmallow import UnmarshalResult  # NOQA
-    MARSHMALLOW_3 = False
-except ImportError:
-    MARSHMALLOW_3 = True
 from marshmallow.fields import Field
 
 
