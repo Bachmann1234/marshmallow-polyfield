@@ -64,7 +64,7 @@ class TestPolyField(object):
             [Rectangle('pink', 4, 93), Triangle('red', 8, 45)]
         )
 
-        data, errors = self.ContrivedShapeClassSchema(strict=True).load(
+        data = self.ContrivedShapeClassSchema().load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
@@ -76,7 +76,6 @@ class TestPolyField(object):
                   'base': 8,
                   'height': 45}]}
         )
-        assert not errors
         assert data == original
 
     def test_deserialize_polyfield_none(self):
@@ -85,42 +84,45 @@ class TestPolyField(object):
             None
         )
 
-        data, errors = self.ContrivedShapeClassSchema(strict=True).load(
+        data = self.ContrivedShapeClassSchema().load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
              'others': None}
         )
-        assert not errors
+
         assert data == original
 
     def test_deserailize_polyfield_none_required(self):
+
         with pytest.raises(ValidationError):
-            self.ContrivedShapeClassSchema(strict=True).load(
+            self.ContrivedShapeClassSchema().load(
                 {'main': None,
                  'others': None}
             )
 
     def test_deserialize_polyfield_invalid(self):
         with pytest.raises(ValidationError):
-            self.ContrivedShapeClassSchema(strict=True).load(
+            self.ContrivedShapeClassSchema().load(
                 {'main': {'color': 'blue', 'something': 4},
                  'others': None}
             )
 
     def test_deserialize_polyfield_invalid_schema_returned_is_invalid(self):
+
         with pytest.raises(ValidationError):
-            self.BadContrivedClassSchema(strict=True).load(
+            self.BadContrivedClassSchema().load(
                 {'main': {'color': 'blue', 'something': 4},
                  'others': None}
             )
 
     def test_deserialize_polyfield_errors(self):
-        data, errors = self.ContrivedShapeClassSchema().load(
-            {'main': {'color': 'blue', 'length': 'four', 'width': 4},
-             'others': None}
-        )
-        assert errors
+
+        with pytest.raises(ValidationError):
+            self.ContrivedShapeClassSchema().load(
+                {'main': {'color': 'blue', 'length': 'four', 'width': 4},
+                 'others': None}
+            )
 
 
 class TestPolyFieldDisambiguationByProperty(object):
@@ -163,7 +165,7 @@ class TestPolyFieldDisambiguationByProperty(object):
             'rectangle'
         )
 
-        data, errors = self.ContrivedShapeClassSchema(strict=True).load(
+        data = self.ContrivedShapeClassSchema().load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
@@ -172,5 +174,5 @@ class TestPolyFieldDisambiguationByProperty(object):
                          'width': 93}],
              'type': 'rectangle'}
         )
-        assert not errors
+
         assert data == original

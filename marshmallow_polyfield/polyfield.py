@@ -54,9 +54,9 @@ class PolyField(Field):
                     )
                 )
             schema.context.update(getattr(self, 'context', {}))
-            data, errors = schema.load(v)
-            if errors:
-                raise ValidationError(errors)
+
+            # Will raise ValidationError if any problems
+            data = schema.load(v)
             results.append(data)
 
         if self.many:
@@ -74,12 +74,15 @@ class PolyField(Field):
                 for v in value:
                     schema = self.serialization_schema_selector(v, obj)
                     schema.context.update(getattr(self, 'context', {}))
-                    res.append(schema.dump(v).data)
+
+                    data = schema.dump(v)
+
+                    res.append(data)
                 return res
             else:
                 schema = self.serialization_schema_selector(value, obj)
                 schema.context.update(getattr(self, 'context', {}))
-                return schema.dump(value).data
+                return schema.dump(value)
         except Exception as err:
             raise TypeError(
                 'Failed to serialize object. Error: {0}\n'
