@@ -1,1 +1,1 @@
-from marshmallow_polyfield.polyfield import PolyField  # noqa
+from marshmallow_polyfield.polyfield import PolyField, PolyFieldBase  # noqa
