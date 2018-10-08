@@ -1,34 +1,14 @@
+import abc
+from six import with_metaclass
+
 from marshmallow import ValidationError
 from marshmallow.fields import Field
 
 
-class PolyField(Field):
-    """
-    A field that (de)serializes to one of many types. Passed in functions
-    are called to disambiguate what schema to use for the (de)serialization
-    Intended to assist in working with fields that can contain any subclass
-    of a base type
-    """
-    def __init__(
-            self,
-            serialization_schema_selector=None,
-            deserialization_schema_selector=None,
-            many=False,
-            **metadata
-    ):
-        """
-        :param serialization_schema_selector: Function that takes in either
-        an object representing that object, it's parent object
-        and returns the appropriate schema.
-        :param deserialization_schema_selector: Function that takes in either
-        an a dict representing that object, dict representing it's parent dict
-        and returns the appropriate schema
-
-        """
-        super(PolyField, self).__init__(**metadata)
+class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
+    def __init__(self, many=False, **metadata):
+        super(PolyFieldBase, self).__init__(**metadata)
         self.many = many
-        self.serialization_schema_selector = serialization_schema_selector
-        self.deserialization_schema_selector = deserialization_schema_selector
 
     def _deserialize(self, value, attr, data):
         if not self.many:
@@ -86,3 +66,45 @@ class PolyField(Field):
                 ' Ensure the serialization_schema_selector exists and '
                 ' returns a Schema and that schema'
                 ' can serialize this value {1}'.format(err, value))
+
+    @abc.abstractmethod
+    def serialization_schema_selector(self, value, obj):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def deserialization_schema_selector(self, value, obj):
+        raise NotImplementedError
+
+
+class PolyField(PolyFieldBase):
+    """
+    A field that (de)serializes to one of many types. Passed in functions
+    are called to disambiguate what schema to use for the (de)serialization
+    Intended to assist in working with fields that can contain any subclass
+    of a base type
+    """
+    def __init__(
+            self,
+            serialization_schema_selector=None,
+            deserialization_schema_selector=None,
+            many=False,
+            **metadata
+    ):
+        """
+        :param serialization_schema_selector: Function that takes in either
+        an object representing that object, it's parent object
+        and returns the appropriate schema.
+        :param deserialization_schema_selector: Function that takes in either
+        an a dict representing that object, dict representing it's parent dict
+        and returns the appropriate schema
+
+        """
+        super(PolyField, self).__init__(many=many, **metadata)
+        self._serialization_schema_selector_arg = serialization_schema_selector
+        self._deserialization_schema_selector_arg = deserialization_schema_selector
+
+    def serialization_schema_selector(self, value, obj):
+        return self._serialization_schema_selector_arg(value, obj)
+
+    def deserialization_schema_selector(self, value, obj):
+        return self._deserialization_schema_selector_arg(value, obj)

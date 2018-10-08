@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name='marshmallow-polyfield',
-    version=3.2,
+    version=3.3,
     description='An unofficial extension to Marshmallow to allow for polymorphic fields',
     long_description=read('README.rst'),
     author='Matt Bachmann',
@@ -21,7 +21,7 @@ setup(
     license=read('LICENSE'),
     keywords=('serialization', 'rest', 'json', 'api', 'marshal',
               'marshalling', 'deserialization', 'validation', 'schema'),
-    install_requires=['marshmallow>=2.0.0'],
+    install_requires=['marshmallow~=2.0', 'six'],
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
