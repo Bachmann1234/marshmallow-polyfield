@@ -40,8 +40,8 @@ def test_serializing_named_tuple_with_meta():
             fields = ('x', 'y')
 
     serialized = PointSerializer().dump(p)
-    assert serialized.data['x'] == 4
-    assert serialized.data['y'] == 2
+    assert serialized['x'] == 4
+    assert serialized['y'] == 2
 
 
 @with_both_shapes
