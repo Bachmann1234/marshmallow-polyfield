@@ -108,6 +108,7 @@ class TestPolyField(object):
                   'base': 8,
                   'height': 45}]}
         )
+        assert not errors
         assert data == original
 
     @with_all(
@@ -126,7 +127,7 @@ class TestPolyField(object):
                       'width': 100},
              'others': None}
         )
-
+        assert not errors
         assert data == original
 
     @with_all(
@@ -240,5 +241,5 @@ class TestPolyFieldDisambiguationByProperty(object):
                          'width': 93}],
              'type': 'rectangle'}
         )
-
+        assert not errors
         assert data == original
