@@ -24,8 +24,6 @@ take in the raw value and return the schema to use.
 
 This field should support the same properties as other Marshmallow fields. I have worked with *required* *allow_none* and *many*.
 
-Last version support v2 is tagged FINAL_V2_VERSION
-
 Installing
 ----------
 ::
