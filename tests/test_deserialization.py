@@ -96,7 +96,7 @@ class TestPolyField(object):
             [Rectangle('pink', 4, 93), Triangle('red', 8, 45)]
         )
 
-        data, errors = schema(strict=True).load(
+        data = schema(strict=True).load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
@@ -108,7 +108,6 @@ class TestPolyField(object):
                   'base': 8,
                   'height': 45}]}
         )
-        assert not errors
         assert data == original
 
     @with_all(
@@ -121,13 +120,12 @@ class TestPolyField(object):
             None
         )
 
-        data, errors = schema(strict=True).load(
+        data= schema(strict=True).load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
              'others': None}
         )
-        assert not errors
         assert data == original
 
     @with_all(
@@ -168,11 +166,10 @@ class TestPolyField(object):
         ContrivedShapeSubclassSchema,
     )
     def test_deserialize_polyfield_errors(self, schema):
-        data, errors = schema().load(
+        schema().load(
             {'main': {'color': 'blue', 'length': 'four', 'width': 4},
              'others': None}
         )
-        assert errors
 
 
 class TestPolyFieldDisambiguationByProperty(object):
@@ -232,7 +229,7 @@ class TestPolyFieldDisambiguationByProperty(object):
             'rectangle'
         )
 
-        data, errors = schema(strict=True).load(
+        data = schema(strict=True).load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
@@ -241,5 +238,4 @@ class TestPolyFieldDisambiguationByProperty(object):
                          'width': 93}],
              'type': 'rectangle'}
         )
-        assert not errors
         assert data == original
