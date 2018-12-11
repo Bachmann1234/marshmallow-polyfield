@@ -1,12 +1,26 @@
-from unittest import TestCase
-
 from marshmallow_polyfield.polyfield import PolyFieldBase
 
 
-class TestPolyFieldBase(TestCase):
-    def run_test(self):
-        with self.assertRaises(NotImplementedError):
-            PolyFieldBase.serialization_schema_selector(None, None, None)
+class TrivialExample(PolyFieldBase):
+    def serialization_schema_selector(self, value, obj):
+        super(TrivialExample, self).serialization_schema_selector(value, obj)
 
-        with self.assertRaises(NotImplementedError):
-            PolyFieldBase.deserialization_schema_selector(None, None, None)
+    def deserialization_schema_selector(self, value, obj):
+        super(TrivialExample, self).deserialization_schema_selector(value, obj)
+
+
+def test_polyfield_base():
+    te = TrivialExample()
+    try:
+        te.serialization_schema_selector(None, None)
+    except NotImplementedError:
+        pass
+    else:
+        assert False, 'expected to raise'
+
+    try:
+        te.deserialization_schema_selector(None, None)
+    except NotImplementedError:
+        pass
+    else:
+        assert False, 'expected to raise'
