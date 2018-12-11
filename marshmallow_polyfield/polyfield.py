@@ -67,10 +67,12 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
                 ' can serialize this value {1}'.format(err, value))
 
     @abc.abstractmethod
-    def serialization_schema_selector(self, value, obj): raise NotImplementedError
+    def serialization_schema_selector(self, value, obj):
+        raise NotImplementedError
 
     @abc.abstractmethod
-    def deserialization_schema_selector(self, value, obj): raise NotImplementedError
+    def deserialization_schema_selector(self, value, obj):
+        raise NotImplementedError
 
 
 class PolyField(PolyFieldBase):
