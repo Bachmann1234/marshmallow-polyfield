@@ -21,7 +21,7 @@ setup(
     license=read('LICENSE'),
     keywords=('serialization', 'rest', 'json', 'api', 'marshal',
               'marshalling', 'deserialization', 'validation', 'schema'),
-    install_requires=['marshmallow>=3.0.0', 'six'],
+    install_requires=['marshmallow', 'six'],
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',

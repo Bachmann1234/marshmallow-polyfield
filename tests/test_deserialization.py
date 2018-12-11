@@ -96,7 +96,7 @@ class TestPolyField(object):
             [Rectangle('pink', 4, 93), Triangle('red', 8, 45)]
         )
 
-        data = schema(strict=True).load(
+        data = schema().load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
@@ -120,7 +120,7 @@ class TestPolyField(object):
             None
         )
 
-        data= schema(strict=True).load(
+        data = schema().load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
@@ -134,7 +134,7 @@ class TestPolyField(object):
     )
     def test_deserailize_polyfield_none_required(self, schema):
         with pytest.raises(ValidationError):
-            schema(strict=True).load(
+            schema().load(
                 {'main': None,
                  'others': None}
             )
@@ -145,7 +145,7 @@ class TestPolyField(object):
     )
     def test_deserialize_polyfield_invalid(self, schema):
         with pytest.raises(ValidationError):
-            schema(strict=True).load(
+            schema().load(
                 {'main': {'color': 'blue', 'something': 4},
                  'others': None}
             )
@@ -156,7 +156,7 @@ class TestPolyField(object):
     )
     def test_deserialize_polyfield_invalid_schema_returned_is_invalid(self, schema):
         with pytest.raises(ValidationError):
-            schema(strict=True).load(
+            schema().load(
                 {'main': {'color': 'blue', 'something': 4},
                  'others': None}
             )
@@ -166,10 +166,11 @@ class TestPolyField(object):
         ContrivedShapeSubclassSchema,
     )
     def test_deserialize_polyfield_errors(self, schema):
-        schema().load(
-            {'main': {'color': 'blue', 'length': 'four', 'width': 4},
-             'others': None}
-        )
+        with pytest.raises(ValidationError):
+            schema().load(
+                {'main': {'color': 'blue', 'length': 'four', 'width': 4},
+                 'others': None}
+            )
 
 
 class TestPolyFieldDisambiguationByProperty(object):
@@ -229,7 +230,7 @@ class TestPolyFieldDisambiguationByProperty(object):
             'rectangle'
         )
 
-        data = schema(strict=True).load(
+        data = schema().load(
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
