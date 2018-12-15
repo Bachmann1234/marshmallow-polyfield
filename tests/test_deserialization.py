@@ -2,12 +2,14 @@ from marshmallow import Schema, ValidationError, post_load, fields
 from marshmallow_polyfield.polyfield import PolyField, PolyFieldBase
 import pytest
 from tests.shapes import (
+    Shape,
     Rectangle,
     Triangle,
     shape_schema_serialization_disambiguation,
     shape_property_schema_serialization_disambiguation,
     shape_schema_deserialization_disambiguation,
-    shape_property_schema_deserialization_disambiguation
+    shape_property_schema_deserialization_disambiguation,
+    fuzzy_schema_deserialization_disambiguation,
 )
 from tests.polyclasses import (
     ShapePolyField,
@@ -74,6 +76,12 @@ class TestPolyField(object):
                 data.get('main'),
                 data.get('others')
             )
+
+    class FuzzySchema(Schema):
+        data = PolyField(
+            deserialization_schema_selector=fuzzy_schema_deserialization_disambiguation,
+            many=True
+        )
 
     class ContrivedShapeSubclassSchema(Schema):
         main = ShapePolyField(required=True)
@@ -171,6 +179,15 @@ class TestPolyField(object):
                 {'main': {'color': 'blue', 'length': 'four', 'width': 4},
                  'others': None}
             )
+
+    def test_fuzzy_schema(self):
+        color = 'cyan'
+        email = 'dummy@example.com'
+        expected_data = {'data': [Shape(color), email]}
+
+        data = self.FuzzySchema().load({'data': [{'color': color}, email]})
+
+        assert data == expected_data
 
 
 class TestPolyFieldDisambiguationByProperty(object):
