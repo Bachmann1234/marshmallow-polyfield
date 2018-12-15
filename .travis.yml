@@ -20,6 +20,6 @@ install:
 before_script:
   - flake8 .
 
-script: py.test tests --cov=marshmallow_polyfield
+script: pytest
 
 after_success: coveralls

@@ -1,7 +1,7 @@
 import abc
 from six import with_metaclass
 
-from marshmallow import ValidationError
+from marshmallow import Schema, ValidationError
 from marshmallow.fields import Field
 
 
@@ -16,26 +16,35 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
 
         results = []
         for v in value:
-            schema = None
+            deserializer = None
             try:
-                schema = self.deserialization_schema_selector(v, data)
-                assert hasattr(schema, 'load')
+                deserializer = self.deserialization_schema_selector(v, data)
+                if isinstance(deserializer, type):
+                    deserializer = deserializer()
+                if not isinstance(deserializer, (Field, Schema)):
+                    raise TypeError('Invalid deserializer type')
             except Exception:
-                schema_message = None
-                if schema:
-                    schema_message = str(type(schema))
+                class_type = None
+                if deserializer:
+                    class_type = str(type(deserializer))
 
                 raise ValidationError(
                     "Unable to use schema. Ensure there is a deserialization_schema_selector"
-                    " and that it returns a schema when the function is passed in {value_passed}."
-                    " This is the class I got. Make sure it is a schema: {class_type}".format(
+                    " and then it returns a field or a schema when the function is passed in "
+                    "{value_passed}. This is the class I got. "
+                    "Make sure it is a field or a schema: {class_type}".format(
                         value_passed=v,
-                        class_type=schema_message
+                        class_type=class_type
                     )
                 )
-            schema.context.update(getattr(self, 'context', {}))
+
             # Will raise ValidationError if any problems
-            data = schema.load(v)
+            if isinstance(deserializer, Field):
+                data = deserializer.deserialize(v, attr, data)
+            else:
+                deserializer.context.update(getattr(self, 'context', {}))
+                data = deserializer.load(v)
+
             results.append(data)
 
         if self.many:
