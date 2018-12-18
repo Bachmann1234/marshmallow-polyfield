@@ -6,10 +6,19 @@ from tests.shapes import (
     Rectangle,
     Triangle,
     shape_schema_serialization_disambiguation,
-    shape_property_schema_serialization_disambiguation,
     shape_schema_deserialization_disambiguation,
-    shape_property_schema_deserialization_disambiguation
 )
+from tests.polyclasses import ShapePolyField, with_all
+
+
+def with_both_shapes(func):
+    return with_all(
+        PolyField(
+            serialization_schema_selector=shape_schema_serialization_disambiguation,
+            deserialization_schema_selector=shape_schema_deserialization_disambiguation
+        ),
+        ShapePolyField()
+    )(func)
 
 
 def test_serializing_named_tuple():
@@ -31,45 +40,42 @@ def test_serializing_named_tuple_with_meta():
             fields = ('x', 'y')
 
     serialized = PointSerializer().dump(p)
-    assert serialized['x'] == 4
-    assert serialized['y'] == 2
+    assert serialized.data['x'] == 4
+    assert serialized.data['y'] == 2
 
 
-def test_serializing_polyfield_rectangle():
+@with_both_shapes
+def test_serializing_polyfield_rectangle(field):
     rect = Rectangle("blue", 4, 10)
     Sticker = namedtuple('Sticker', ['shape', 'image'])
     marshmallow_sticker = Sticker(rect, "marshmallow.png")
-    field = PolyField(
-        serialization_schema_selector=shape_schema_serialization_disambiguation,
-        deserialization_schema_selector=shape_schema_deserialization_disambiguation
-    )
     rect_dict = field.serialize('shape', marshmallow_sticker)
 
     assert rect_dict == {"length": 4, "width": 10, "color": "blue"}
 
 
-def test_serializing_polyfield_None():
+@with_both_shapes
+def test_serializing_polyfield_None(field):
     Sticker = namedtuple('Sticker', ['shape', 'image'])
     marshmallow_sticker = Sticker(None, "marshmallow.png")
-    field = PolyField(
-        serialization_schema_selector=shape_schema_serialization_disambiguation,
-        deserialization_schema_selector=shape_schema_deserialization_disambiguation
-    )
     rect_dict = field.serialize('shape', marshmallow_sticker)
 
     assert rect_dict is None
 
 
-def test_serializing_polyfield_many():
+@with_all(
+    PolyField(
+        serialization_schema_selector=shape_schema_serialization_disambiguation,
+        deserialization_schema_selector=shape_schema_deserialization_disambiguation,
+        many=True
+    ),
+    ShapePolyField(many=True)
+)
+def test_serializing_polyfield_many(field):
     rect = Rectangle("blue", 4, 10)
     tri = Triangle("red", 1, 100)
     StickerCollection = namedtuple('StickerCollection', ['shapes', 'image'])
     marshmallow_sticker_collection = StickerCollection([rect, tri], "marshmallow.png")
-    field = PolyField(
-        serialization_schema_selector=shape_schema_serialization_disambiguation,
-        deserialization_schema_selector=shape_schema_deserialization_disambiguation,
-        many=True
-    )
     shapes = field.serialize('shapes', marshmallow_sticker_collection)
     expected_shapes = [
         {"length": 4, "width": 10, "color": "blue"},
@@ -78,24 +84,18 @@ def test_serializing_polyfield_many():
     assert shapes == expected_shapes
 
 
-def test_invalid_polyfield():
+@with_both_shapes
+def test_invalid_polyfield(field):
     Sticker = namedtuple('Sticker', ['shape', 'image'])
     with pytest.raises(TypeError):
-        field = PolyField(
-            serialization_schema_selector=shape_schema_serialization_disambiguation,
-            deserialization_schema_selector=shape_schema_deserialization_disambiguation
-        )
         field.serialize('shape', Sticker(3, 3))
 
 
-def test_serializing_polyfield_by_parent_type():
+@with_both_shapes
+def test_serializing_polyfield_by_parent_type(field):
     rect = Rectangle("blue", 4, 10)
     Sticker = namedtuple('Sticker', ['shape', 'image', 'type'])
     marshmallow_sticker = Sticker(rect, "marshmallow.png", 'rectangle')
-    field = PolyField(
-        serialization_schema_selector=shape_property_schema_serialization_disambiguation,
-        deserialization_schema_selector=shape_property_schema_deserialization_disambiguation
-    )
     rect_dict = field.serialize('shape', marshmallow_sticker)
 
     assert rect_dict == {"length": 4, "width": 10, "color": "blue"}
