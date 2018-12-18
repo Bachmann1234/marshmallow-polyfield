@@ -12,6 +12,8 @@ Marshmallow-Polyfield
     :target: https://coveralls.io/github/Bachmann1234/marshmallow-polyfield?branch=master
     :alt: Coverage Status
 
+This branch supports Marshmallow 3.0 and above. For 2.0 support see `GitHub <polyfield-2support>`_ 
+
 An unofficial extension to Marshmallow to allow for polymorphic fields.
 
 Marshmallow is a fantastic library for serialization and deserialization of data.
