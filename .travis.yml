@@ -1,21 +1,25 @@
-# Config file for automatic testing at travis-ci.org
-
+dist: xenial
 language: python
 sudo: false
-python:
-  - "3.6"
-  - "2.7"
-  - "pypy"
-
+matrix:
+  include:
+  - python: '2.7'
+  - python: '3.6'
+  - python: '3.7'
+  - python: pypy
+    dist: trusty
 before_install:
-  - pip install -U pip
-
+- pip install -U pip
 install:
-  - pip install -U -r requirements.txt
-
+- pip install -U -r requirements.txt
 before_script:
-  - flake8 .
-
-script: py.test tests --cov=marshmallow_polyfield
-
+- flake8 .
+script: pytest
 after_success: coveralls
+deploy:
+  provider: pypi
+  user: "matt.bachmann"
+  password:
+    secure: i68kRacnIViEF+4t8/r8L+w8RJv/WeGIIf9l+s6lSXxkmedQPVogCWLyFZXLCHZP4a9vp/ho/UzP9phB9Gv9B/KBJ/cXqgGrTzamyBNvFu4MUXjUWSfQcnPLE7Wyq+DYzoFbGTnk1F3kQKhxUkZ2RZu3v9NXZN78lSvhexyTv+QXk9wIZTP2gYANt+a/grhVHqZ0YQLukv3iOO3yKLtvh0Td2MQJK7y7J4gC11Z9qv0AGosIWVnVUocxVCny5H6zXtmwTefwbj9ZoeeDCsf/sPrWen7plHJeClmDRejjwByourzbv2NMV6IL3BIP62Bl/uJqQQxaLGMce2vdduA88OuYfoom3yJyEr1aW6yjbTK13Zrk5yQu6AUdZtYcqD05DZekwaNpozr4ua1iYL7naYhfQk8qM3K6cxbHih2Ri7nM+dyECB24VQhuIbILqmEvJhiQmlzLwRognCj4sd9u9EwxAPJlTxwiZXMbtCu8nWazL7FVPO/Imc63kbPZy4EPgD8MsV7lPJbRNlkINT6jpd6o0pC9iVq6fKio0YlxUxQ+VKTahtVLlLIxI1emUZRjrSiWHh81V3prbIugICF8JgRbuK0Kw8xxJfMxwtM/UbBz6jfdrv0QD07WlIf71v6/ZuGakVPzKs9yJU4m5g52MHuFOEMH5jD7jS00Rg24lSA=
+  on:
+    tags: true
