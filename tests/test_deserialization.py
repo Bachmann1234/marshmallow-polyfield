@@ -243,7 +243,7 @@ class TestPolyFieldDisambiguationByProperty(object):
     def test_deserialize_polyfield(self, schema):
         original = self.ContrivedShapeClass(
             Rectangle('blue', 1, 100),
-            [Rectangle('pink', 4, 93)],
+            [Rectangle('pink', 4, 93), Rectangle('red', 3, 90)],
             'rectangle'
         )
 
@@ -251,9 +251,13 @@ class TestPolyFieldDisambiguationByProperty(object):
             {'main': {'color': 'blue',
                       'length': 1,
                       'width': 100},
-             'others': [{'color': 'pink',
-                         'length': 4,
-                         'width': 93}],
+             'others': [
+                 {'color': 'pink',
+                  'length': 4,
+                  'width': 93},
+                 {'color': 'red',
+                  'length': 3,
+                  'width': 90}],
              'type': 'rectangle'}
         )
         assert data == original

@@ -10,7 +10,7 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
         super(PolyFieldBase, self).__init__(**metadata)
         self.many = many
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, parent):
         if not self.many:
             value = [value]
 
@@ -18,7 +18,7 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
         for v in value:
             deserializer = None
             try:
-                deserializer = self.deserialization_schema_selector(v, data)
+                deserializer = self.deserialization_schema_selector(v, parent)
                 if isinstance(deserializer, type):
                     deserializer = deserializer()
                 if not isinstance(deserializer, (Field, Schema)):
@@ -40,7 +40,7 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
 
             # Will raise ValidationError if any problems
             if isinstance(deserializer, Field):
-                data = deserializer.deserialize(v, attr, data)
+                data = deserializer.deserialize(v, attr, parent)
             else:
                 deserializer.context.update(getattr(self, 'context', {}))
                 data = deserializer.load(v)
