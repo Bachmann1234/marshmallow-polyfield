@@ -1,5 +1,5 @@
 import abc
-from six import with_metaclass
+from six import raise_from, with_metaclass
 
 from marshmallow import Schema, ValidationError
 from marshmallow.fields import Field
@@ -23,19 +23,24 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
                     deserializer = deserializer()
                 if not isinstance(deserializer, (Field, Schema)):
                     raise TypeError('Invalid deserializer type')
-            except Exception:
+            except Exception as err:
                 class_type = None
                 if deserializer:
                     class_type = str(type(deserializer))
 
-                raise ValidationError(
-                    "Unable to use schema. Ensure there is a deserialization_schema_selector"
-                    " and then it returns a field or a schema when the function is passed in "
-                    "{value_passed}. This is the class I got. "
-                    "Make sure it is a field or a schema: {class_type}".format(
-                        value_passed=v,
-                        class_type=class_type
-                    )
+                raise_from(
+                    ValidationError(
+                        "Unable to use schema. Error: {err}\n"
+                        "Ensure there is a deserialization_schema_selector"
+                        " and then it returns a field or a schema when the function is passed in "
+                        "{value_passed}. This is the class I got. "
+                        "Make sure it is a field or a schema: {class_type}".format(
+                            err=err,
+                            value_passed=v,
+                            class_type=class_type
+                        )
+                    ),
+                    err
                 )
 
             # Will raise ValidationError if any problems
