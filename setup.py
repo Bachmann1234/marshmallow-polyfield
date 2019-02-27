@@ -11,13 +11,13 @@ def read(fname):
 
 setup(
     name='marshmallow-polyfield',
-    version=5.4,
+    version=5.5,
     description='An unofficial extension to Marshmallow to allow for polymorphic fields',
     long_description=read('README.rst'),
     author='Matt Bachmann',
     author_email='bachmann.matt@gmail.com',
     url='https://github.com/Bachmann1234/marshmallow-polyfield',
-    packages=['marshmallow_polyfield', 'tests'],
+    packages=['marshmallow_polyfield'],
     license=read('LICENSE'),
     keywords=('serialization', 'rest', 'json', 'api', 'marshal',
               'marshalling', 'deserialization', 'validation', 'schema'),
