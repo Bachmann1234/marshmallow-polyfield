@@ -19,7 +19,7 @@ from tests.polyclasses import (
 
 
 def _bad_deserializer_disambiguation(self, _):
-        return 1
+    return 1
 
 
 class BadClassPolyField(PolyFieldBase):
