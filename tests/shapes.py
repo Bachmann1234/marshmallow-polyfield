@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import six
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load, ValidationError
 
 
 class Shape(object):
@@ -91,8 +91,12 @@ def shape_property_schema_serialization_disambiguation(base_object, obj):
 
 def shape_schema_deserialization_disambiguation(object_dict, _):
     if object_dict.get("base"):
+        if object_dict.get("base") < 0:
+            raise ValidationError("Base cannot be negative.")
         return TriangleSchema()
     elif object_dict.get("length"):
+        if object_dict.get("length") < 0:
+            raise Exception("Bad Case")
         return RectangleSchema()
 
     raise TypeError("Could not detect type. "

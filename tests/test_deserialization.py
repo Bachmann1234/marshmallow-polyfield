@@ -151,11 +151,40 @@ class TestPolyField(object):
         ContrivedShapeClassSchema,
         ContrivedShapeSubclassSchema,
     )
-    def test_deserialize_polyfield_invalid(self, schema):
-        with pytest.raises(ValidationError):
+    def test_deserialize_polyfield_invalid_type_error(self, schema):
+        with pytest.raises(ValidationError) as excinfo:
             schema().load(
                 {'main': {'color': 'blue', 'something': 4},
                  'others': None}
+            )
+
+        assert str(excinfo.value) == str("{'main': ['Could not detect type. "
+                                     "Did not have a base or a length. "
+                                     "Are you sure this is a shape?']}")
+
+    @with_all(
+        ContrivedShapeClassSchema,
+        ContrivedShapeSubclassSchema,
+    )
+    def test_deserialize_polyfield_invalid_validation_error(self, schema):
+        with pytest.raises(ValidationError) as excinfo:
+            schema().load(
+                {'main': {'base': -1, 'something': 4},
+                 'others': None}
+            )
+
+        assert str(excinfo.value) == "{'main': ['Base cannot be negative.']}"
+
+    @with_all(
+        ContrivedShapeClassSchema,
+        ContrivedShapeSubclassSchema,
+    )
+    def test_deserialize_polyfield_invalid_generic_error(self, schema):
+        with pytest.raises(ValidationError, match='Ensure there is a deserialization_schema_selector'):
+            schema().load(
+                {'main': {'width': 100, 'length': -1},
+                 'others': {'width': 100, 'length': 10}}
+
             )
 
     @with_all(
