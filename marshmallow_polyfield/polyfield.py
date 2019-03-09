@@ -25,7 +25,7 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
                     raise TypeError('Invalid deserializer type')
             except TypeError as te:
                 raise_from(ValidationError(str(te)), te)
-            except ValidationError as ve:
+            except ValidationError:
                 raise
             except Exception as err:
                 class_type = None
