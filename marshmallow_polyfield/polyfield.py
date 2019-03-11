@@ -22,7 +22,7 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
                 if isinstance(deserializer, type):
                     deserializer = deserializer()
                 if not isinstance(deserializer, (Field, Schema)):
-                    raise TypeError('Invalid deserializer type')
+                    raise Exception('Invalid deserializer type')
             except TypeError as te:
                 raise_from(ValidationError(str(te)), te)
             except ValidationError:
