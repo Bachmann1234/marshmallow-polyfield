@@ -10,7 +10,7 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
         super(PolyFieldBase, self).__init__(**metadata)
         self.many = many
 
-    def _deserialize(self, value, attr, parent):
+    def _deserialize(self, value, attr, parent, **kwargs):
         if not self.many:
             value = [value]
 
@@ -62,7 +62,7 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
             # Will be at least one otherwise value would have been None
             return results[0]
 
-    def _serialize(self, value, key, obj):
+    def _serialize(self, value, key, obj, **kwargs):
         if value is None:
             return None
         try:
