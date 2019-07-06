@@ -15,7 +15,7 @@ class ShapeSchema(Schema):
     color = fields.Str(allow_none=True)
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, **_):
         return Shape(**data)
 
 
@@ -31,7 +31,7 @@ class TriangleSchema(ShapeSchema):
     height = fields.Int(required=True)
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, **_):
         return Triangle(
             color=data['color'],
             base=data['base'],
@@ -51,7 +51,7 @@ class RectangleSchema(ShapeSchema):
     width = fields.Int(required=True)
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, **_):
         return Rectangle(
             color=data['color'],
             length=data['length'],
