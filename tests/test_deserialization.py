@@ -71,7 +71,7 @@ class TestPolyField(object):
         )
 
         @post_load
-        def make_object(self, data):
+        def make_object(self, data, **_):
             return TestPolyField.ContrivedShapeClass(
                 data.get('main'),
                 data.get('others')
@@ -88,7 +88,7 @@ class TestPolyField(object):
         others = ShapePolyField(allow_none=True, many=True)
 
         @post_load
-        def make_object(self, data):
+        def make_object(self, data, **_):
             return TestPolyField.ContrivedShapeClass(
                 data.get('main'),
                 data.get('others')
@@ -246,7 +246,7 @@ class TestPolyFieldDisambiguationByProperty(object):
         type = fields.String(required=True)
 
         @post_load
-        def make_object(self, data):
+        def make_object(self, data, **_):
             return TestPolyFieldDisambiguationByProperty.ContrivedShapeClass(
                 data.get('main'),
                 data.get('others'),
@@ -259,7 +259,7 @@ class TestPolyFieldDisambiguationByProperty(object):
         type = fields.String(required=True)
 
         @post_load
-        def make_object(self, data):
+        def make_object(self, data, **_):
             return TestPolyFieldDisambiguationByProperty.ContrivedShapeClass(
                 data.get('main'),
                 data.get('others'),
