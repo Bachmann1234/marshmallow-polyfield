@@ -19,8 +19,8 @@ setup(
     url='https://github.com/Bachmann1234/marshmallow-polyfield',
     packages=['marshmallow_polyfield'],
     license=read('LICENSE'),
-    keywords=('serialization', 'rest', 'json', 'api', 'marshal',
-              'marshalling', 'deserialization', 'validation', 'schema'),
+    keywords=['serialization', 'rest', 'json', 'api', 'marshal',
+              'marshalling', 'deserialization', 'validation', 'schema'],
     install_requires=['marshmallow>=3.0.0b10', 'six'],
     classifiers=[
         'Intended Audience :: Developers',
