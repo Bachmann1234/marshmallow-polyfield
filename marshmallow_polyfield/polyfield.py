@@ -9,6 +9,8 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
     def __init__(self, many=False, **metadata):
         super(PolyFieldBase, self).__init__(**metadata)
         self.many = many
+        self.serializer_modifies = False
+        self.deserializer_modifies = False
 
     def _deserialize(self, value, attr, parent, **kwargs):
         if not self.many:
@@ -18,7 +20,12 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
         for v in value:
             deserializer = None
             try:
-                deserializer = self.deserialization_schema_selector(v, parent)
+                if self.deserializer_modifies:
+                    deserializer, v = (
+                        self.deserialization_modifier(v, parent)
+                    )
+                else:
+                    deserializer = self.deserialization_schema_selector(v, parent)
                 if isinstance(deserializer, type):
                     deserializer = deserializer()
                 if not isinstance(deserializer, (Field, Schema)):
@@ -69,12 +76,18 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
             if self.many:
                 res = []
                 for v in value:
-                    schema = self.serialization_schema_selector(v, obj)
+                    if self.serializer_modifies:
+                        schema, v = self.serialization_modifier(v, obj)
+                    else:
+                        schema = self.serialization_schema_selector(v, obj)
                     schema.context.update(getattr(self, 'context', {}))
                     res.append(schema.dump(v))
                 return res
             else:
-                schema = self.serialization_schema_selector(value, obj)
+                if self.serializer_modifies:
+                    schema, value = self.serialization_modifier(value, obj)
+                else:
+                    schema = self.serialization_schema_selector(value, obj)
                 schema.context.update(getattr(self, 'context', {}))
                 return schema.dump(value)
         except Exception as err:
@@ -92,6 +105,14 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
     def deserialization_schema_selector(self, value, obj):
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def serialization_modifier(self, value, obj):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def deserialization_modifier(self, value, obj):
+        raise NotImplementedError
+
 
 class PolyField(PolyFieldBase):
     """
@@ -104,6 +125,8 @@ class PolyField(PolyFieldBase):
             self,
             serialization_schema_selector=None,
             deserialization_schema_selector=None,
+            serialization_modifier=None,
+            deserialization_modifier=None,
             many=False,
             **metadata
     ):
@@ -119,9 +142,20 @@ class PolyField(PolyFieldBase):
         super(PolyField, self).__init__(many=many, **metadata)
         self._serialization_schema_selector_arg = serialization_schema_selector
         self._deserialization_schema_selector_arg = deserialization_schema_selector
+        self._serialization_modifier_arg = serialization_modifier
+        self._deserialization_modifier_arg = deserialization_modifier
+        # TODO: make above exclusive to each other
+        self.serializer_modifies = self._serialization_modifier_arg is not None
+        self.deserializer_modifies = self._deserialization_modifier_arg is not None
 
     def serialization_schema_selector(self, value, obj):
         return self._serialization_schema_selector_arg(value, obj)
 
     def deserialization_schema_selector(self, value, obj):
         return self._deserialization_schema_selector_arg(value, obj)
+
+    def serialization_modifier(self, value, obj):
+        return self._serialization_modifier_arg(value, obj)
+
+    def deserialization_modifier(self, value, obj):
+        return self._deserialization_modifier_arg(value, obj)

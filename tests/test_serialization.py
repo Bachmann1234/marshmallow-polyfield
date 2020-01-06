@@ -99,3 +99,97 @@ def test_serializing_polyfield_by_parent_type(field):
     rect_dict = field.serialize('shape', marshmallow_sticker)
 
     assert rect_dict == {"length": 4, "width": 10, "color": "blue"}
+
+
+def test_serializing_with_modification():
+    import marshmallow
+
+    def create_label_schema(schema):
+        class LabelSchema(marshmallow.Schema):
+            type = marshmallow.fields.String()
+            value = schema()
+
+        return LabelSchema
+
+    class_to_schema = {
+        str: marshmallow.fields.String,
+        int: marshmallow.fields.Integer,
+    }
+
+    name_to_class = {
+        'str': str,
+        'int': int,
+    }
+
+    class_to_name = {
+        cls: name
+        for name, cls in name_to_class.items()
+    }
+
+    def serialization_disambiguation(base_object, parent_obj):
+        cls = type(base_object)
+        schema = class_to_schema[cls]
+        name = class_to_name[cls]
+
+        label_schema = create_label_schema(schema=schema)
+
+        return label_schema(), {'type': name, 'value': base_object}
+
+    def deserialization_disambiguation(object_dict, parent_object_dict):
+        name = object_dict['type']
+        value = object_dict['value']
+        cls = name_to_class[name]
+        schema = class_to_schema[cls]
+
+        # for key, item in parent_object_dict.items():
+        #     if item is object_dict:
+        #         break
+        # else:
+        #     raise Exception('ack')
+        #
+        # parent_object_dict[key] = value
+        # print(parent_object_dict)
+
+        # label_schema = create_label_schema(
+        #     schema=class_to_schema[name_to_class[name]],
+        #     type_name=name,
+        #     instance=object_dict,
+        # )
+
+        return schema(), value
+
+    class TopClass:
+        def __init__(self, polyfield):
+            self.polyfield = polyfield
+
+        def __eq__(self, other):
+            if type(self) != type(other):
+                return False
+
+            return self.polyfield == other.polyfield
+
+    class TopSchema(marshmallow.Schema):
+        polyfield = PolyField(
+            serialization_modifier=serialization_disambiguation,
+            deserialization_modifier=deserialization_disambiguation,
+        )
+
+        @marshmallow.decorators.post_load
+        def make_object(self, data, many, partial):
+            return TopClass(**data)
+
+    top_schema = TopSchema()
+
+    top_class_str_example = TopClass(polyfield='abc')
+    top_class_str_example_dumped = top_schema.dump(top_class_str_example)
+    print(top_class_str_example_dumped)
+    top_class_str_example_loaded = top_schema.load(top_class_str_example_dumped)
+    assert top_class_str_example_loaded == top_class_str_example
+
+    print('---')
+
+    top_class_int_example = TopClass(polyfield=42)
+    top_class_int_example_dumped = top_schema.dump(top_class_int_example)
+    print(top_class_int_example_dumped)
+    top_class_int_example_loaded = top_schema.load(top_class_int_example_dumped)
+    assert top_class_int_example_loaded == top_class_int_example

@@ -29,6 +29,12 @@ class BadClassPolyField(PolyFieldBase):
     def deserialization_schema_selector(self, value, obj):
         return _bad_deserializer_disambiguation(value, obj)
 
+    def serialization_modifier(self, value, obj):
+        return _bad_deserializer_disambiguation(value, obj), value
+
+    def deserialization_modifier(self, value, obj):
+        return _bad_deserializer_disambiguation(value, obj), value
+
 
 class TestPolyField(object):
 

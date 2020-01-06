@@ -8,6 +8,12 @@ class TrivialExample(PolyFieldBase):
     def deserialization_schema_selector(self, value, obj):
         super(TrivialExample, self).deserialization_schema_selector(value, obj)
 
+    def serialization_modifier(self, value, obj):
+        super(TrivialExample, self).serialization_schema_selector(value, obj), value
+
+    def deserialization_modifier(self, value, obj):
+        super(TrivialExample, self).deserialization_schema_selector(value, obj), value
+
 
 def test_polyfield_base():
     te = TrivialExample()
