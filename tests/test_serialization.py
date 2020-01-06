@@ -126,37 +126,29 @@ def test_serializing_with_modification():
         for name, cls in name_to_class.items()
     }
 
-    def serialization_disambiguation(base_object, parent_obj):
+    def serialization_schema(base_object, parent_obj):
         cls = type(base_object)
         schema = class_to_schema[cls]
-        name = class_to_name[cls]
 
         label_schema = create_label_schema(schema=schema)
 
-        return label_schema(), {'type': name, 'value': base_object}
+        return label_schema()
 
-    def deserialization_disambiguation(object_dict, parent_object_dict):
+    def serialization_value(base_object, parent_obj):
+        cls = type(base_object)
+        name = class_to_name[cls]
+
+        return {'type': name, 'value': base_object}
+
+    def deserialization_schema(object_dict, parent_object_dict):
         name = object_dict['type']
-        value = object_dict['value']
         cls = name_to_class[name]
         schema = class_to_schema[cls]
 
-        # for key, item in parent_object_dict.items():
-        #     if item is object_dict:
-        #         break
-        # else:
-        #     raise Exception('ack')
-        #
-        # parent_object_dict[key] = value
-        # print(parent_object_dict)
+        return schema()
 
-        # label_schema = create_label_schema(
-        #     schema=class_to_schema[name_to_class[name]],
-        #     type_name=name,
-        #     instance=object_dict,
-        # )
-
-        return schema(), value
+    def deserialization_value(object_dict, parent_object_dict):
+        return object_dict['value']
 
     class TopClass:
         def __init__(self, polyfield):
@@ -170,8 +162,10 @@ def test_serializing_with_modification():
 
     class TopSchema(marshmallow.Schema):
         polyfield = PolyField(
-            serialization_modifier=serialization_disambiguation,
-            deserialization_modifier=deserialization_disambiguation,
+            serialization_schema_selector=serialization_schema,
+            deserialization_schema_selector=deserialization_schema,
+            serialization_value_modifier=serialization_value,
+            deserialization_value_modifier=deserialization_value,
         )
 
         @marshmallow.decorators.post_load

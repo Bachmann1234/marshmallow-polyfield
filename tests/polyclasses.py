@@ -26,22 +26,10 @@ class ShapePolyField(PolyFieldBase):
     def deserialization_schema_selector(self, value, obj):
         return shape_schema_deserialization_disambiguation(value, obj)
 
-    def serialization_modifier(self, value, obj):
-        return shape_schema_serialization_disambiguation(value, obj), value
-
-    def deserialization_modifier(self, value, obj):
-        return shape_schema_deserialization_disambiguation(value, obj), value
-
 
 class ShapePropertyPolyField(PolyFieldBase):
     def serialization_schema_selector(self, value, obj):
         return shape_property_schema_serialization_disambiguation(value, obj)
 
     def deserialization_schema_selector(self, value, obj):
-        return shape_property_schema_deserialization_disambiguation(value, obj)
-
-    def serialization_modifier(self, value, obj):
-        return shape_property_schema_serialization_disambiguation(value, obj)
-
-    def deserialization_modifier(self, value, obj):
         return shape_property_schema_deserialization_disambiguation(value, obj)
