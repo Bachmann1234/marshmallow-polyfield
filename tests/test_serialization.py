@@ -227,3 +227,100 @@ def test_serializing_with_modification_ExplicitPolyField():
     print(top_class_int_example_dumped)
     top_class_int_example_loaded = top_schema.load(top_class_int_example_dumped)
     assert top_class_int_example_loaded == top_class_int_example
+
+
+explicit_poly_field = ExplicitPolyField(
+    class_to_schema_mapping={
+        str: fields.String,
+        int: fields.Integer,
+        dict: fields.Dict,
+    },
+)
+
+
+ExplicitPolyFieldExample = namedtuple(
+    'ExplicitPolyFieldExample',
+    [
+        'type_name',
+        'value',
+        'layer',
+        'field',
+    ],
+)
+
+
+def create_explicit_poly_field_example(type_name, value, field):
+    return ExplicitPolyFieldExample(
+        type_name=type_name,
+        value=value,
+        layer={'type': type_name, 'value': value},
+        field=field,
+    )
+
+
+parametrize_explicit_poly_field_type_name_and_value = pytest.mark.parametrize(
+    ['example'],
+    [
+        [create_explicit_poly_field_example(
+            type_name='str',
+            value='red',
+            field=fields.String,
+        )],
+        [create_explicit_poly_field_example(
+            type_name='int',
+            value=42,
+            field=fields.Integer,
+        )],
+        [create_explicit_poly_field_example(
+            type_name='dict',
+            value={'puppy': 3.9},
+            field=fields.Dict,
+        )],
+    ],
+)
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_serializing_explicit_poly_field(example):
+    Point = namedtuple('Point', ['x', 'y'])
+    p = Point(x=example.value, y=37)
+
+    assert explicit_poly_field.serialize('x', p) == example.layer
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_serializing_explicit_poly_field_type_name(example):
+    Point = namedtuple('Point', ['x', 'y'])
+    p = Point(x=example.value, y=37)
+
+    serialized = explicit_poly_field.serialize('x', p)
+    assert serialized['type'] == example.type_name
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_serializing_explicit_poly_field_type_name(example):
+    Point = namedtuple('Point', ['x', 'y'])
+    p = Point(x=example.value, y=37)
+
+    serialized = explicit_poly_field.serialize('x', p)
+    assert serialized['value'] is example.value
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_deserializing_explicit_poly_field_value(example):
+    assert explicit_poly_field.deserialize(example.layer) is example.value
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_deserializing_explicit_poly_field_field_type(example):
+    # TODO: Checking the type only does so much, really want to compare
+    #       the fields but they don't implement == so we'll have to code
+    #       that up to check it.
+    assert (
+        type(explicit_poly_field.deserialization_schema_selector(
+            example.layer,
+            {'x': example.layer},
+        ))
+        is type(example.field())
+    )
+
