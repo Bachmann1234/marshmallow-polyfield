@@ -1,6 +1,6 @@
 from collections import namedtuple
-from marshmallow import fields, Schema
-from marshmallow_polyfield.polyfield import PolyField
+from marshmallow import decorators, fields, Schema
+from marshmallow_polyfield.polyfield import PolyField, ExplicitPolyField
 import pytest
 from tests.shapes import (
     Rectangle,
@@ -169,6 +169,46 @@ def test_serializing_with_modification():
         )
 
         @marshmallow.decorators.post_load
+        def make_object(self, data, many, partial):
+            return TopClass(**data)
+
+    top_schema = TopSchema()
+
+    top_class_str_example = TopClass(polyfield='abc')
+    top_class_str_example_dumped = top_schema.dump(top_class_str_example)
+    print(top_class_str_example_dumped)
+    top_class_str_example_loaded = top_schema.load(top_class_str_example_dumped)
+    assert top_class_str_example_loaded == top_class_str_example
+
+    print('---')
+
+    top_class_int_example = TopClass(polyfield=42)
+    top_class_int_example_dumped = top_schema.dump(top_class_int_example)
+    print(top_class_int_example_dumped)
+    top_class_int_example_loaded = top_schema.load(top_class_int_example_dumped)
+    assert top_class_int_example_loaded == top_class_int_example
+
+
+def test_serializing_with_modification_ExplicitPolyField():
+    class TopClass:
+        def __init__(self, polyfield):
+            self.polyfield = polyfield
+
+        def __eq__(self, other):
+            if type(self) != type(other):
+                return False
+
+            return self.polyfield == other.polyfield
+
+    class TopSchema(Schema):
+        polyfield = ExplicitPolyField(
+            class_to_schema_mapping={
+                str: fields.String,
+                int: fields.Integer,
+            },
+        )
+
+        @decorators.post_load
         def make_object(self, data, many, partial):
             return TopClass(**data)
 

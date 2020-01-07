@@ -2,7 +2,7 @@ import abc
 from six import raise_from, with_metaclass
 
 from marshmallow import Schema, ValidationError
-from marshmallow.fields import Field
+from marshmallow.fields import Field, String
 
 
 class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
@@ -130,8 +130,8 @@ class PolyField(PolyFieldBase):
         super(PolyField, self).__init__(many=many, **metadata)
         self._serialization_schema_selector_arg = serialization_schema_selector
         self._deserialization_schema_selector_arg = deserialization_schema_selector
-        self._serialization_value_modifier_arg = serialization_value_modifier
-        self._deserialization_value_modifier_arg = deserialization_value_modifier
+        self.serialization_value_modifier = serialization_value_modifier
+        self.deserialization_value_modifier = deserialization_value_modifier
 
     def serialization_schema_selector(self, value, obj):
         return self._serialization_schema_selector_arg(value, obj)
@@ -139,8 +139,54 @@ class PolyField(PolyFieldBase):
     def deserialization_schema_selector(self, value, obj):
         return self._deserialization_schema_selector_arg(value, obj)
 
-    def serialization_value_modifier(self, value, obj):
-        return self._serialization_value_modifier_arg(value, obj)
 
-    def deserialization_value_modifier(self, value, obj):
-        return self._deserialization_value_modifier_arg(value, obj)
+def create_label_schema(schema):
+    class LabelSchema(Schema):
+        type = String()
+        value = schema()
+
+    return LabelSchema
+
+
+class ExplicitPolyField(PolyFieldBase):
+    def __init__(
+            self,
+            class_to_schema_mapping,
+            create_label_schema=create_label_schema,
+            many=False,
+            **metadata
+    ):
+        super(ExplicitPolyField, self).__init__(many=many, **metadata)
+        self._class_to_schema_mapping = class_to_schema_mapping
+        self._class_to_name = {
+            cls: cls.__name__
+            for cls in self._class_to_schema_mapping.keys()
+        }
+        self._name_to_class = {
+            name: cls
+            for cls, name in self._class_to_name.items()
+        }
+        self.create_label_schema = create_label_schema
+
+    def serialization_schema_selector(self, base_object, parent_obj):
+        cls = type(base_object)
+        schema = self._class_to_schema_mapping[cls]
+        label_schema = self.create_label_schema(schema=schema)
+
+        return label_schema()
+
+    def serialization_value_modifier(self, base_object, parent_obj):
+        cls = type(base_object)
+        name = self._class_to_name[cls]
+
+        return {'type': name, 'value': base_object}
+
+    def deserialization_schema_selector(self, object_dict, parent_object_dict):
+        name = object_dict['type']
+        cls = self._name_to_class[name]
+        schema = self._class_to_schema_mapping[cls]
+
+        return schema()
+
+    def deserialization_value_modifier(self, object_dict, parent_object_dict):
+        return object_dict['value']
