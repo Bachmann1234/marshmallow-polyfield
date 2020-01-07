@@ -234,7 +234,7 @@ def test_serializing_with_modification_ExplicitPolyField():
     assert top_class_int_example_loaded == top_class_int_example
 
 
-explicit_poly_field = ExplicitPolyField(
+explicit_poly_field_with_overrides = ExplicitPolyField(
     class_to_schema_mapping={
         text_type: fields.String,
         int: fields.Integer,
@@ -246,6 +246,14 @@ explicit_poly_field = ExplicitPolyField(
 )
 
 
+explicit_poly_field_without_overrides = ExplicitPolyField(
+    class_to_schema_mapping={
+        int: fields.Integer,
+        dict: fields.Dict,
+    },
+)
+
+
 ExplicitPolyFieldExample = namedtuple(
     'ExplicitPolyFieldExample',
     [
@@ -253,16 +261,18 @@ ExplicitPolyFieldExample = namedtuple(
         'value',
         'layer',
         'field',
+        'polyfield',
     ],
 )
 
 
-def create_explicit_poly_field_example(type_name, value, field):
+def create_explicit_poly_field_example(type_name, value, field, polyfield):
     return ExplicitPolyFieldExample(
         type_name=type_name,
         value=value,
         layer={'type': type_name, 'value': value},
         field=field,
+        polyfield=polyfield,
     )
 
 
@@ -273,16 +283,31 @@ parametrize_explicit_poly_field_type_name_and_value = pytest.mark.parametrize(
             type_name=u'str',
             value=u'red',
             field=fields.String,
+            polyfield=explicit_poly_field_with_overrides,
         )],
         [create_explicit_poly_field_example(
             type_name=u'int',
             value=42,
             field=fields.Integer,
+            polyfield=explicit_poly_field_with_overrides,
         )],
         [create_explicit_poly_field_example(
             type_name=u'dict',
             value={u'puppy': 3.9},
             field=fields.Dict,
+            polyfield=explicit_poly_field_with_overrides,
+        )],
+        [create_explicit_poly_field_example(
+            type_name=u'int',
+            value=42,
+            field=fields.Integer,
+            polyfield=explicit_poly_field_without_overrides,
+        )],
+        [create_explicit_poly_field_example(
+            type_name=u'dict',
+            value={u'puppy': 3.9},
+            field=fields.Dict,
+            polyfield=explicit_poly_field_without_overrides,
         )],
     ],
 )
@@ -293,7 +318,7 @@ def test_serializing_explicit_poly_field(example):
     Point = namedtuple('Point', ['x', 'y'])
     p = Point(x=example.value, y=37)
 
-    assert explicit_poly_field.serialize('x', p) == example.layer
+    assert example.polyfield.serialize('x', p) == example.layer
 
 
 @parametrize_explicit_poly_field_type_name_and_value
@@ -301,7 +326,7 @@ def test_serializing_explicit_poly_field_type_name(example):
     Point = namedtuple('Point', ['x', 'y'])
     p = Point(x=example.value, y=37)
 
-    serialized = explicit_poly_field.serialize('x', p)
+    serialized = example.polyfield.serialize('x', p)
     assert serialized['type'] == example.type_name
 
 
@@ -310,13 +335,13 @@ def test_serializing_explicit_poly_field_value(example):
     Point = namedtuple('Point', ['x', 'y'])
     p = Point(x=example.value, y=37)
 
-    serialized = explicit_poly_field.serialize('x', p)
+    serialized = example.polyfield.serialize('x', p)
     assert serialized['value'] is example.value
 
 
 @parametrize_explicit_poly_field_type_name_and_value
 def test_deserializing_explicit_poly_field_value(example):
-    assert explicit_poly_field.deserialize(example.layer) is example.value
+    assert example.polyfield.deserialize(example.layer) is example.value
 
 
 @parametrize_explicit_poly_field_type_name_and_value
@@ -325,7 +350,7 @@ def test_deserializing_explicit_poly_field_field_type(example):
     #       the fields but they don't implement == so we'll have to code
     #       that up to check it.
     assert (
-        type(explicit_poly_field.deserialization_schema_selector(
+        type(example.polyfield.deserialization_schema_selector(
             example.layer,
             {'x': example.layer},
         ))
