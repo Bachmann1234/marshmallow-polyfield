@@ -298,7 +298,7 @@ def test_serializing_explicit_poly_field_type_name(example):
 
 
 @parametrize_explicit_poly_field_type_name_and_value
-def test_serializing_explicit_poly_field_type_name(example):
+def test_serializing_explicit_poly_field_value(example):
     Point = namedtuple('Point', ['x', 'y'])
     p = Point(x=example.value, y=37)
 
