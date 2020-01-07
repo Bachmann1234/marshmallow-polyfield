@@ -153,15 +153,23 @@ class ExplicitPolyField(PolyFieldBase):
             self,
             class_to_schema_mapping,
             create_label_schema=create_label_schema,
+            class_to_name_overrides=None,
             many=False,
             **metadata
     ):
         super(ExplicitPolyField, self).__init__(many=many, **metadata)
+
+        if class_to_name_overrides is None:
+            class_to_name_overrides = {}
+
         self._class_to_schema_mapping = class_to_schema_mapping
         self._class_to_name = {
             cls: cls.__name__
             for cls in self._class_to_schema_mapping.keys()
         }
+
+        self._class_to_name.update(class_to_name_overrides)
+
         self._name_to_class = {
             name: cls
             for cls, name in self._class_to_name.items()
@@ -179,14 +187,14 @@ class ExplicitPolyField(PolyFieldBase):
         cls = type(base_object)
         name = self._class_to_name[cls]
 
-        return {'type': name, 'value': base_object}
+        return {u'type': name, u'value': base_object}
 
     def deserialization_schema_selector(self, object_dict, parent_object_dict):
-        name = object_dict['type']
+        name = object_dict[u'type']
         cls = self._name_to_class[name]
         schema = self._class_to_schema_mapping[cls]
 
         return schema()
 
     def deserialization_value_modifier(self, object_dict, parent_object_dict):
-        return object_dict['value']
+        return object_dict[u'value']

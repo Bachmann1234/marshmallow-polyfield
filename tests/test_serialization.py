@@ -2,6 +2,7 @@ from collections import namedtuple
 from marshmallow import decorators, fields, Schema
 from marshmallow_polyfield.polyfield import PolyField, ExplicitPolyField
 import pytest
+from six import text_type
 from tests.shapes import (
     Rectangle,
     Triangle,
@@ -112,19 +113,20 @@ def test_serializing_with_modification():
         return LabelSchema
 
     class_to_schema = {
-        str: marshmallow.fields.String,
+        text_type: marshmallow.fields.String,
         int: marshmallow.fields.Integer,
     }
 
     name_to_class = {
-        'str': str,
-        'int': int,
+        u'str': text_type,
+        u'int': int,
     }
 
     class_to_name = {
         cls: name
         for name, cls in name_to_class.items()
     }
+    class_to_name[text_type] = u'str'
 
     def serialization_schema(base_object, parent_obj):
         cls = type(base_object)
@@ -169,12 +171,12 @@ def test_serializing_with_modification():
         )
 
         @marshmallow.decorators.post_load
-        def make_object(self, data, many, partial):
+        def make_object(self, data, many=None, partial=None):
             return TopClass(**data)
 
     top_schema = TopSchema()
 
-    top_class_str_example = TopClass(polyfield='abc')
+    top_class_str_example = TopClass(polyfield=u'abc')
     top_class_str_example_dumped = top_schema.dump(top_class_str_example)
     print(top_class_str_example_dumped)
     top_class_str_example_loaded = top_schema.load(top_class_str_example_dumped)
@@ -203,18 +205,21 @@ def test_serializing_with_modification_ExplicitPolyField():
     class TopSchema(Schema):
         polyfield = ExplicitPolyField(
             class_to_schema_mapping={
-                str: fields.String,
+                text_type: fields.String,
                 int: fields.Integer,
+            },
+            class_to_name_overrides={
+                text_type: u'str',
             },
         )
 
         @decorators.post_load
-        def make_object(self, data, many, partial):
+        def make_object(self, data, many=None, partial=None):
             return TopClass(**data)
 
     top_schema = TopSchema()
 
-    top_class_str_example = TopClass(polyfield='abc')
+    top_class_str_example = TopClass(polyfield=u'abc')
     top_class_str_example_dumped = top_schema.dump(top_class_str_example)
     print(top_class_str_example_dumped)
     top_class_str_example_loaded = top_schema.load(top_class_str_example_dumped)
@@ -231,9 +236,12 @@ def test_serializing_with_modification_ExplicitPolyField():
 
 explicit_poly_field = ExplicitPolyField(
     class_to_schema_mapping={
-        str: fields.String,
+        text_type: fields.String,
         int: fields.Integer,
         dict: fields.Dict,
+    },
+    class_to_name_overrides={
+        text_type: 'str',
     },
 )
 
@@ -262,18 +270,18 @@ parametrize_explicit_poly_field_type_name_and_value = pytest.mark.parametrize(
     ['example'],
     [
         [create_explicit_poly_field_example(
-            type_name='str',
-            value='red',
+            type_name=u'str',
+            value=u'red',
             field=fields.String,
         )],
         [create_explicit_poly_field_example(
-            type_name='int',
+            type_name=u'int',
             value=42,
             field=fields.Integer,
         )],
         [create_explicit_poly_field_example(
-            type_name='dict',
-            value={'puppy': 3.9},
+            type_name=u'dict',
+            value={u'puppy': 3.9},
             field=fields.Dict,
         )],
     ],
@@ -322,5 +330,4 @@ def test_deserializing_explicit_poly_field_field_type(example):
             {'x': example.layer},
         ))
         is type(example.field())
-    )
-
+    )   # noqa E721
