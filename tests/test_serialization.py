@@ -9,7 +9,11 @@ from tests.shapes import (
     shape_schema_serialization_disambiguation,
     shape_schema_deserialization_disambiguation,
 )
-from tests.polyclasses import ShapePolyField, with_all
+from tests.polyclasses import (
+    BadStringValueModifierPolyField,
+    ShapePolyField,
+    with_all,
+)
 
 
 def with_both_shapes(func):
@@ -232,6 +236,25 @@ def test_serializing_with_modification_ExplicitPolyField():
     print(top_class_int_example_dumped)
     top_class_int_example_loaded = top_schema.load(top_class_int_example_dumped)
     assert top_class_int_example_loaded == top_class_int_example
+
+
+def test_polyfield_serialization_value_modifier():
+    bad_value = 'here is a specific string'
+
+    field = BadStringValueModifierPolyField(bad_string_value=bad_value)
+
+    Point = namedtuple('Point', ['x', 'y'])
+    p = Point(x='another different string', y=37)
+
+    assert field.serialize('x', p)['a'] is bad_value
+
+
+def test_polyfield_deserialization_value_modifier():
+    bad_value = 'here is a specific string'
+
+    field = BadStringValueModifierPolyField(bad_string_value=bad_value)
+
+    assert field.deserialize('another different string')['a'] is bad_value
 
 
 explicit_poly_field_with_overrides = ExplicitPolyField(
