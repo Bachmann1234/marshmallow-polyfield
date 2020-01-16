@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-import six
 from marshmallow import Schema, fields, post_load, ValidationError
 
 
@@ -123,7 +121,7 @@ def shape_property_schema_deserialization_disambiguation(object_dict, data):
 def fuzzy_schema_deserialization_disambiguation(data, _):
     if isinstance(data, dict):
         return ShapeSchema
-    if isinstance(data, six.string_types):
+    if isinstance(data, str):
         return fields.Email
 
     raise TypeError('Could not detect type. '
