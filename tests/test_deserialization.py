@@ -12,6 +12,8 @@ from tests.shapes import (
     fuzzy_schema_deserialization_disambiguation,
 )
 from tests.polyclasses import (
+    BadStringValueModifierPolyField,
+    parametrize_explicit_poly_field_type_name_and_value,
     ShapePolyField,
     ShapePropertyPolyField,
     with_all
@@ -291,3 +293,30 @@ class TestPolyFieldDisambiguationByProperty(object):
              'type': 'rectangle'}
         )
         assert data == original
+
+
+def test_polyfield_deserialization_value_modifier():
+    bad_value = 'here is a specific string'
+
+    field = BadStringValueModifierPolyField(bad_string_value=bad_value)
+
+    assert field.deserialize('another different string')['a'] is bad_value
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_deserializing_explicit_poly_field_value(example):
+    assert example.polyfield.deserialize(example.layer) is example.value
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_deserializing_explicit_poly_field_field_type(example):
+    # TODO: Checking the type only does so much, really want to compare
+    #       the fields but they don't implement == so we'll have to code
+    #       that up to check it.
+    assert (
+        type(example.polyfield.deserialization_schema_selector(
+            example.layer,
+            {'x': example.layer},
+        ))
+        is type(example.field())
+    )   # noqa E721

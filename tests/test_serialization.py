@@ -1,8 +1,8 @@
 from collections import namedtuple
 from marshmallow import fields, Schema
-from marshmallow_polyfield.polyfield import PolyField, ExplicitPolyField
+from marshmallow_polyfield.polyfield import PolyField
 import pytest
-from six import text_type
+
 from tests.shapes import (
     Rectangle,
     Triangle,
@@ -11,6 +11,7 @@ from tests.shapes import (
 )
 from tests.polyclasses import (
     BadStringValueModifierPolyField,
+    parametrize_explicit_poly_field_type_name_and_value,
     ShapePolyField,
     with_all,
 )
@@ -117,93 +118,6 @@ def test_polyfield_serialization_value_modifier():
     assert field.serialize('x', p)['a'] is bad_value
 
 
-def test_polyfield_deserialization_value_modifier():
-    bad_value = 'here is a specific string'
-
-    field = BadStringValueModifierPolyField(bad_string_value=bad_value)
-
-    assert field.deserialize('another different string')['a'] is bad_value
-
-
-explicit_poly_field_with_overrides = ExplicitPolyField(
-    class_to_schema_mapping={
-        text_type: fields.String,
-        int: fields.Integer,
-        dict: fields.Dict,
-    },
-    class_to_name_overrides={
-        text_type: 'str',
-    },
-)
-
-
-explicit_poly_field_without_overrides = ExplicitPolyField(
-    class_to_schema_mapping={
-        int: fields.Integer,
-        dict: fields.Dict,
-    },
-)
-
-
-ExplicitPolyFieldExample = namedtuple(
-    'ExplicitPolyFieldExample',
-    [
-        'type_name',
-        'value',
-        'layer',
-        'field',
-        'polyfield',
-    ],
-)
-
-
-def create_explicit_poly_field_example(type_name, value, field, polyfield):
-    return ExplicitPolyFieldExample(
-        type_name=type_name,
-        value=value,
-        layer={'type': type_name, 'value': value},
-        field=field,
-        polyfield=polyfield,
-    )
-
-
-parametrize_explicit_poly_field_type_name_and_value = pytest.mark.parametrize(
-    ['example'],
-    [
-        [create_explicit_poly_field_example(
-            type_name=u'str',
-            value=u'red',
-            field=fields.String,
-            polyfield=explicit_poly_field_with_overrides,
-        )],
-        [create_explicit_poly_field_example(
-            type_name=u'int',
-            value=42,
-            field=fields.Integer,
-            polyfield=explicit_poly_field_with_overrides,
-        )],
-        [create_explicit_poly_field_example(
-            type_name=u'dict',
-            value={u'puppy': 3.9},
-            field=fields.Dict,
-            polyfield=explicit_poly_field_with_overrides,
-        )],
-        [create_explicit_poly_field_example(
-            type_name=u'int',
-            value=42,
-            field=fields.Integer,
-            polyfield=explicit_poly_field_without_overrides,
-        )],
-        [create_explicit_poly_field_example(
-            type_name=u'dict',
-            value={u'puppy': 3.9},
-            field=fields.Dict,
-            polyfield=explicit_poly_field_without_overrides,
-        )],
-    ],
-)
-
-
 @parametrize_explicit_poly_field_type_name_and_value
 def test_serializing_explicit_poly_field(example):
     Point = namedtuple('Point', ['x', 'y'])
@@ -228,22 +142,3 @@ def test_serializing_explicit_poly_field_value(example):
 
     serialized = example.polyfield.serialize('x', p)
     assert serialized['value'] is example.value
-
-
-@parametrize_explicit_poly_field_type_name_and_value
-def test_deserializing_explicit_poly_field_value(example):
-    assert example.polyfield.deserialize(example.layer) is example.value
-
-
-@parametrize_explicit_poly_field_type_name_and_value
-def test_deserializing_explicit_poly_field_field_type(example):
-    # TODO: Checking the type only does so much, really want to compare
-    #       the fields but they don't implement == so we'll have to code
-    #       that up to check it.
-    assert (
-        type(example.polyfield.deserialization_schema_selector(
-            example.layer,
-            {'x': example.layer},
-        ))
-        is type(example.field())
-    )   # noqa E721

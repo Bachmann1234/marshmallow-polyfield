@@ -1,5 +1,11 @@
-from marshmallow_polyfield import PolyFieldBase
+from collections import namedtuple
+
 from marshmallow import Schema, fields
+import pytest
+from six import text_type
+
+from marshmallow_polyfield import PolyFieldBase
+from marshmallow_polyfield.polyfield import ExplicitPolyField
 
 from tests.shapes import (
     shape_schema_serialization_disambiguation,
@@ -60,3 +66,82 @@ class BadStringValueModifierPolyField(PolyFieldBase):
 
     def deserialization_value_modifier(self, value, obj):
         return {'a': self.bad_string_value}
+
+
+explicit_poly_field_with_overrides = ExplicitPolyField(
+    class_to_schema_mapping={
+        text_type: fields.String,
+        int: fields.Integer,
+        dict: fields.Dict,
+    },
+    class_to_name_overrides={
+        text_type: 'str',
+    },
+)
+
+
+explicit_poly_field_without_overrides = ExplicitPolyField(
+    class_to_schema_mapping={
+        int: fields.Integer,
+        dict: fields.Dict,
+    },
+)
+
+
+ExplicitPolyFieldExample = namedtuple(
+    'ExplicitPolyFieldExample',
+    [
+        'type_name',
+        'value',
+        'layer',
+        'field',
+        'polyfield',
+    ],
+)
+
+
+def create_explicit_poly_field_example(type_name, value, field, polyfield):
+    return ExplicitPolyFieldExample(
+        type_name=type_name,
+        value=value,
+        layer={'type': type_name, 'value': value},
+        field=field,
+        polyfield=polyfield,
+    )
+
+
+parametrize_explicit_poly_field_type_name_and_value = pytest.mark.parametrize(
+    ['example'],
+    [
+        [create_explicit_poly_field_example(
+            type_name=u'str',
+            value=u'red',
+            field=fields.String,
+            polyfield=explicit_poly_field_with_overrides,
+        )],
+        [create_explicit_poly_field_example(
+            type_name=u'int',
+            value=42,
+            field=fields.Integer,
+            polyfield=explicit_poly_field_with_overrides,
+        )],
+        [create_explicit_poly_field_example(
+            type_name=u'dict',
+            value={u'puppy': 3.9},
+            field=fields.Dict,
+            polyfield=explicit_poly_field_with_overrides,
+        )],
+        [create_explicit_poly_field_example(
+            type_name=u'int',
+            value=42,
+            field=fields.Integer,
+            polyfield=explicit_poly_field_without_overrides,
+        )],
+        [create_explicit_poly_field_example(
+            type_name=u'dict',
+            value={u'puppy': 3.9},
+            field=fields.Dict,
+            polyfield=explicit_poly_field_without_overrides,
+        )],
+    ],
+)
