@@ -2,7 +2,6 @@ from collections import namedtuple
 
 from marshmallow import Schema, fields
 import pytest
-from six import text_type
 
 from marshmallow_polyfield import PolyFieldBase, ExplicitPolyField
 
@@ -47,10 +46,7 @@ class BadStringValueModifierSchema(Schema):
 
 class BadStringValueModifierPolyField(PolyFieldBase):
     def __init__(self, bad_string_value, many=False, **metadata):
-        super(BadStringValueModifierPolyField, self).__init__(
-            many=many,
-            **metadata
-        )
+        super().__init__(many=many, **metadata)
 
         self.bad_string_value = bad_string_value
 
@@ -69,12 +65,12 @@ class BadStringValueModifierPolyField(PolyFieldBase):
 
 explicit_poly_field_with_overrides = ExplicitPolyField(
     class_to_schema_mapping={
-        text_type: fields.String,
+        str: fields.String,
         int: fields.Integer,
         dict: fields.Dict,
     },
     class_to_name_overrides={
-        text_type: 'str',
+        str: 'str',
     },
 )
 

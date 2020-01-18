@@ -173,7 +173,7 @@ class ExplicitPolyField(PolyFieldBase):
         :param class_to_name_overrides: Classes as keys mapped to the name to
         use as the serialized type name.  Default is to use ``cls.__name__``.
         """
-        super(ExplicitPolyField, self).__init__(many=many, **metadata)
+        super().__init__(many=many, **metadata)
 
         if class_to_name_overrides is None:
             class_to_name_overrides = {}
