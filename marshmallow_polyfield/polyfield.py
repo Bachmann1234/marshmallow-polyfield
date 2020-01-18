@@ -187,7 +187,10 @@ class ExplicitPolyField(PolyFieldBase):
         self._class_to_name.update(class_to_name_overrides)
 
         name_to_classes = {
-            name: [cls for cls, name in class_name_pairs]
+            name: sorted(
+                (cls for cls, name in class_name_pairs),
+                key=lambda cls: cls.__name__,
+            )
             for name, class_name_pairs in itertools.groupby(
                 sorted(self._class_to_name.items(), key=lambda x: x[1]),
                 key=lambda x: x[1],

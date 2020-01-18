@@ -39,7 +39,7 @@ def test_explicit_polyfield_raises_for_nonunique_names():
 
     with pytest.raises(
             ExplicitNamesNotUniqueError,
-            match=re.escape("{'same name': [<class 'str'>, <class 'int'>]}"),
+            match=re.escape("{'same name': [<class 'int'>, <class 'str'>]}"),
     ):
         ExplicitPolyField(
             class_to_schema_mapping={
