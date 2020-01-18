@@ -149,6 +149,12 @@ def create_label_schema(schema):
 
 
 class ExplicitPolyField(PolyFieldBase):
+    """
+    Similar to PolyField except that disambiguation is done by creating and
+    consuming an extra layer with an explicit string used to disambiguate the
+    type.  The layer defaults to the form of ``{'type': cls.__name__,
+    'value': <serialized value>}``.
+    """
     def __init__(
             self,
             class_to_schema_mapping,
@@ -157,6 +163,14 @@ class ExplicitPolyField(PolyFieldBase):
             many=False,
             **metadata
     ):
+        """
+        :param class_to_schema_mapping: Classes as keys mapped to the schema
+        to be used for each.
+        :param create_label_schema: Callable returning a schema used to create
+        the extra serialized layer including the type name.
+        :param class_to_name_overrides: Classes as keys mapped to the name to
+        use as the serialized type name.  Default is to use ``cls.__name__``.
+        """
         super(ExplicitPolyField, self).__init__(many=many, **metadata)
 
         if class_to_name_overrides is None:
