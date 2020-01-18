@@ -11,10 +11,10 @@ import pytest
 
 class TrivialExample(PolyFieldBase):
     def serialization_schema_selector(self, value, obj):
-        super(TrivialExample, self).serialization_schema_selector(value, obj)
+        super().serialization_schema_selector(value, obj)
 
     def deserialization_schema_selector(self, value, obj):
-        super(TrivialExample, self).deserialization_schema_selector(value, obj)
+        super().deserialization_schema_selector(value, obj)
 
 
 def test_polyfield_base():

@@ -1,15 +1,14 @@
 import abc
 import itertools
 
-from six import raise_from, with_metaclass
 
 from marshmallow import Schema, ValidationError
 from marshmallow.fields import Field, String
 
 
-class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
+class PolyFieldBase(Field, metaclass=abc.ABCMeta):
     def __init__(self, many=False, **metadata):
-        super(PolyFieldBase, self).__init__(**metadata)
+        super().__init__(**metadata)
         self.many = many
 
     def _deserialize(self, value, attr, parent, **kwargs):
@@ -27,7 +26,7 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
                 if not isinstance(deserializer, (Field, Schema)):
                     raise Exception('Invalid deserializer type')
             except TypeError as te:
-                raise_from(ValidationError(str(te)), te)
+                raise ValidationError(str(te)) from te
             except ValidationError:
                 raise
             except Exception as err:
@@ -35,20 +34,17 @@ class PolyFieldBase(with_metaclass(abc.ABCMeta, Field)):
                 if deserializer:
                     class_type = str(type(deserializer))
 
-                raise_from(
-                    ValidationError(
-                        "Unable to use schema. Error: {err}\n"
-                        "Ensure there is a deserialization_schema_selector"
-                        " and then it returns a field or a schema when the function is passed in "
-                        "{value_passed}. This is the class I got. "
-                        "Make sure it is a field or a schema: {class_type}".format(
-                            err=err,
-                            value_passed=v,
-                            class_type=class_type
-                        )
-                    ),
-                    err
-                )
+                raise ValidationError(
+                    "Unable to use schema. Error: {err}\n"
+                    "Ensure there is a deserialization_schema_selector"
+                    " and then it returns a field or a schema when the function is passed in "
+                    "{value_passed}. This is the class I got. "
+                    "Make sure it is a field or a schema: {class_type}".format(
+                        err=err,
+                        value_passed=v,
+                        class_type=class_type
+                    )
+                ) from err
 
             # Will raise ValidationError if any problems
             if isinstance(deserializer, Field):
@@ -129,7 +125,7 @@ class PolyField(PolyFieldBase):
         and returns the appropriate schema
 
         """
-        super(PolyField, self).__init__(many=many, **metadata)
+        super().__init__(many=many, **metadata)
         self._serialization_schema_selector_arg = serialization_schema_selector
         self._deserialization_schema_selector_arg = deserialization_schema_selector
         self.serialization_value_modifier = serialization_value_modifier

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-import six
 from marshmallow import Schema, fields, post_load, ValidationError
 
 
@@ -21,7 +19,7 @@ class ShapeSchema(Schema):
 
 class Triangle(Shape):
     def __init__(self, color, base, height):
-        super(Triangle, self).__init__(color)
+        super().__init__(color)
         self.base = base
         self.height = height
 
@@ -41,7 +39,7 @@ class TriangleSchema(ShapeSchema):
 
 class Rectangle(Shape):
     def __init__(self, color, length, width):
-        super(Rectangle, self).__init__(color)
+        super().__init__(color)
         self.length = length
         self.width = width
 
@@ -123,7 +121,7 @@ def shape_property_schema_deserialization_disambiguation(object_dict, data):
 def fuzzy_schema_deserialization_disambiguation(data, _):
     if isinstance(data, dict):
         return ShapeSchema
-    if isinstance(data, six.string_types):
+    if isinstance(data, str):
         return fields.Email
 
     raise TypeError('Could not detect type. '
