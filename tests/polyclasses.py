@@ -4,8 +4,7 @@ from marshmallow import Schema, fields
 import pytest
 from six import text_type
 
-from marshmallow_polyfield import PolyFieldBase
-from marshmallow_polyfield.polyfield import ExplicitPolyField
+from marshmallow_polyfield import PolyFieldBase, ExplicitPolyField
 
 from tests.shapes import (
     shape_schema_serialization_disambiguation,
