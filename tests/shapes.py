@@ -19,7 +19,7 @@ class ShapeSchema(Schema):
 
 class Triangle(Shape):
     def __init__(self, color, base, height):
-        super(Triangle, self).__init__(color)
+        super().__init__(color)
         self.base = base
         self.height = height
 
@@ -39,7 +39,7 @@ class TriangleSchema(ShapeSchema):
 
 class Rectangle(Shape):
     def __init__(self, color, length, width):
-        super(Rectangle, self).__init__(color)
+        super().__init__(color)
         self.length = length
         self.width = width
 
