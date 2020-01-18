@@ -103,3 +103,69 @@ Once setup the schema should act like any other schema. If it does not then plea
                 data.get('main'),
                 data.get('others')
             )
+
+ExplicitPolyField
+-----------------
+
+The ``ExplicitPolyField`` class adds an additional layer to the serialized data to embed a string used to disambiguate the type of the serialized data.
+This avoids any uncertainty when faced with similarly serialized classes.
+A mapping from classes to be supported to the schemas used to process them must be provided.
+By default the serialized type names are taken from ``cls.__name__`` but this can be overridden.
+
+.. code:: python
+
+    import json
+
+    from marshmallow import Schema, decorators, fields
+    from marshmallow_polyfield import ExplicitPolyField
+    from six import text_type
+
+
+    class TopClass:
+        def __init__(self, polyfield_list):
+            self.polyfield_list = polyfield_list
+
+        def __eq__(self, other):
+            if type(self) != type(other):
+                return False
+
+            return self.polyfield_list == other.polyfield_list
+
+    class TopSchema(Schema):
+        polyfield_list = fields.List(ExplicitPolyField(
+            class_to_schema_mapping={
+                text_type: fields.String,
+                int: fields.Integer,
+            },
+            class_to_name_overrides={
+                text_type: u'my string name',
+            },
+        ))
+
+        @decorators.post_load
+        def make_object(self, data, many=None, partial=None):
+            return TopClass(**data)
+
+    top_schema = TopSchema()
+
+    top_class_example = TopClass(polyfield_list=[u'epf', 37])
+    top_class_example_dumped = top_schema.dump(top_class_example)
+    top_class_example_loaded = top_schema.load(top_class_example_dumped)
+
+    assert top_class_example_loaded == top_class_example
+    print(json.dumps(top_class_example_dumped, indent=4))
+
+.. code:: json
+
+    {
+        "polyfield_list": [
+            {
+                "type": "my string name",
+                "value": "epf"
+            },
+            {
+                "type": "int",
+                "value": 37
+            }
+        ]
+    }
