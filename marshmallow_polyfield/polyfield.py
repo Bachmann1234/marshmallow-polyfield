@@ -1,4 +1,6 @@
 import abc
+import itertools
+
 from six import raise_from, with_metaclass
 
 from marshmallow import Schema, ValidationError
@@ -148,6 +150,10 @@ def create_label_schema(schema):
     return LabelSchema
 
 
+class ExplicitNamesNotUniqueError(Exception):
+    pass
+
+
 class ExplicitPolyField(PolyFieldBase):
     """
     Similar to PolyField except that disambiguation is done by creating and
@@ -184,10 +190,28 @@ class ExplicitPolyField(PolyFieldBase):
 
         self._class_to_name.update(class_to_name_overrides)
 
-        self._name_to_class = {
-            name: cls
-            for cls, name in self._class_to_name.items()
+        name_to_classes = {
+            name: [cls for cls, name in class_name_pairs]
+            for name, class_name_pairs in itertools.groupby(
+                sorted(self._class_to_name.items(), key=lambda x: x[1]),
+                key=lambda x: x[1],
+            )
         }
+
+        reused_names = {
+            name: classes
+            for name, classes in name_to_classes.items()
+            if len(classes) > 1
+        }
+
+        if len(reused_names) > 0:
+            raise ExplicitNamesNotUniqueError(repr(reused_names))
+
+        self._name_to_class = {
+            name: classes[0]
+            for name, classes in name_to_classes.items()
+        }
+
         self.create_label_schema = create_label_schema
 
     def serialization_schema_selector(self, base_object, parent_obj):
