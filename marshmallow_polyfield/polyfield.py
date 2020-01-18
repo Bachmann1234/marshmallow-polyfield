@@ -6,7 +6,7 @@ from marshmallow.fields import Field
 
 class PolyFieldBase(Field, metaclass=abc.ABCMeta):
     def __init__(self, many=False, **metadata):
-        super(PolyFieldBase, self).__init__(**metadata)
+        super().__init__(**metadata)
         self.many = many
 
     def _deserialize(self, value, attr, parent, **kwargs):
@@ -112,7 +112,7 @@ class PolyField(PolyFieldBase):
         and returns the appropriate schema
 
         """
-        super(PolyField, self).__init__(many=many, **metadata)
+        super().__init__(many=many, **metadata)
         self._serialization_schema_selector_arg = serialization_schema_selector
         self._deserialization_schema_selector_arg = deserialization_schema_selector
 
