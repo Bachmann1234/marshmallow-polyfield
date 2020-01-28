@@ -1,6 +1,6 @@
 =====================
 Marshmallow-Polyfield
-=====================
+======================
 
 .. image:: https://readthedocs.org/projects/marshmallow-polyfield/badge/?version=latest
     :target: https://readthedocs.org/projects/marshmallow-polyfield/?badge=latest
