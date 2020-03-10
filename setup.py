@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name='marshmallow-polyfield',
-    version=5.8,
+    version=5.9,
     description='An unofficial extension to Marshmallow to allow for polymorphic fields',
     long_description=read('README.rst'),
     long_description_content_type='text/x-rst',
