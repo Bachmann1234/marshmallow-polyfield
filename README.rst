@@ -2,11 +2,8 @@
 Marshmallow-Polyfield
 =====================
 
-.. image:: https://readthedocs.org/projects/marshmallow-polyfield/badge/?version=latest
-    :target: https://readthedocs.org/projects/marshmallow-polyfield/?badge=latest
-    :alt: Documentation Status
-.. image:: https://travis-ci.org/Bachmann1234/marshmallow-polyfield.svg?branch=master
-    :target: https://travis-ci.org/Bachmann1234/marshmallow-polyfield
+.. image:: https://travis-ci.com/Bachmann1234/marshmallow-polyfield.svg?branch=master
+    :target: https://travis-ci.com/Bachmann1234/marshmallow-polyfield
     :alt: Build Status
 .. image:: https://coveralls.io/repos/Bachmann1234/marshmallow-polyfield/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/Bachmann1234/marshmallow-polyfield?branch=master
