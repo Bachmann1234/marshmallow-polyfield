@@ -1,4 +1,12 @@
-from marshmallow_polyfield.polyfield import PolyFieldBase
+import re
+
+from marshmallow import fields
+from marshmallow_polyfield.polyfield import (
+    ExplicitPolyField,
+    ExplicitNamesNotUniqueError,
+    PolyFieldBase,
+)
+import pytest
 
 
 class TrivialExample(PolyFieldBase):
@@ -24,3 +32,19 @@ def test_polyfield_base():
         pass
     else:
         assert False, 'expected to raise'
+
+
+def test_explicit_polyfield_raises_for_nonunique_names():
+    same_name = 'same name'
+
+    with pytest.raises(
+            ExplicitNamesNotUniqueError,
+            match=re.escape("{'same name': [<class 'int'>, <class 'str'>]}"),
+    ):
+        ExplicitPolyField(
+            class_to_schema_mapping={
+                str: fields.String,
+                int: fields.Integer,
+            },
+            class_to_name_overrides={str: same_name, int: same_name},
+        )

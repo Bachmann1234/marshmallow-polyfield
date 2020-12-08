@@ -2,13 +2,19 @@ from collections import namedtuple
 from marshmallow import fields, Schema
 from marshmallow_polyfield.polyfield import PolyField
 import pytest
+
 from tests.shapes import (
     Rectangle,
     Triangle,
     shape_schema_serialization_disambiguation,
     shape_schema_deserialization_disambiguation,
 )
-from tests.polyclasses import ShapePolyField, with_all
+from tests.polyclasses import (
+    BadStringValueModifierPolyField,
+    parametrize_explicit_poly_field_type_name_and_value,
+    ShapePolyField,
+    with_all,
+)
 
 
 def with_both_shapes(func):
@@ -99,3 +105,40 @@ def test_serializing_polyfield_by_parent_type(field):
     rect_dict = field.serialize('shape', marshmallow_sticker)
 
     assert rect_dict == {"length": 4, "width": 10, "color": "blue"}
+
+
+def test_polyfield_serialization_value_modifier():
+    bad_value = 'here is a specific string'
+
+    field = BadStringValueModifierPolyField(bad_string_value=bad_value)
+
+    Point = namedtuple('Point', ['x', 'y'])
+    p = Point(x='another different string', y=37)
+
+    assert field.serialize('x', p)['a'] is bad_value
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_serializing_explicit_poly_field(example):
+    Point = namedtuple('Point', ['x', 'y'])
+    p = Point(x=example.value, y=37)
+
+    assert example.polyfield.serialize('x', p) == example.layer
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_serializing_explicit_poly_field_type_name(example):
+    Point = namedtuple('Point', ['x', 'y'])
+    p = Point(x=example.value, y=37)
+
+    serialized = example.polyfield.serialize('x', p)
+    assert serialized['type'] == example.type_name
+
+
+@parametrize_explicit_poly_field_type_name_and_value
+def test_serializing_explicit_poly_field_value(example):
+    Point = namedtuple('Point', ['x', 'y'])
+    p = Point(x=example.value, y=37)
+
+    serialized = example.polyfield.serialize('x', p)
+    assert serialized['value'] is example.value
