@@ -9,7 +9,7 @@ class PolyFieldBase(Field, metaclass=abc.ABCMeta):
         super().__init__(**metadata)
         self.many = many
 
-    def _deserialize(self, value, attr, parent, **kwargs):
+    def _deserialize(self, value, attr, parent, partial=None, **kwargs):
         if not self.many:
             value = [value]
 
@@ -48,7 +48,7 @@ class PolyFieldBase(Field, metaclass=abc.ABCMeta):
                 data = deserializer.deserialize(v, attr, parent)
             else:
                 deserializer.context.update(getattr(self, 'context', {}))
-                data = deserializer.load(v)
+                data = deserializer.load(v, partial=partial)
 
             results.append(data)
 

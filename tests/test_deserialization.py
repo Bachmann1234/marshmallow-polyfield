@@ -291,3 +291,22 @@ class TestPolyFieldDisambiguationByProperty(object):
              'type': 'rectangle'}
         )
         assert data == original
+
+
+def test_deserialize_polyfield_partial_loading():
+
+    class CircleSchema(Schema):
+        color = fields.Str(required=True)
+        radius = fields.Int(required=True)
+
+    class PartialLoadingShapeSchema(Schema):
+        shape = PolyField(
+            deserialization_schema_selector=lambda _, __: CircleSchema,
+            required=True
+        )
+
+    data = {'shape': {'radius': 1}}
+
+    assert PartialLoadingShapeSchema().load(data, partial=True) == data
+    assert PartialLoadingShapeSchema(partial=True).load(data) == data
+    assert PartialLoadingShapeSchema().load(data, partial=("shape.color", )) == data
