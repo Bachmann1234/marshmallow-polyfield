@@ -126,3 +126,24 @@ def fuzzy_schema_deserialization_disambiguation(data, _):
 
     raise TypeError('Could not detect type. '
                     'Are you sure this is a shape or an email?')
+
+
+def fuzzy_pos_schema_selector(data, _):
+    if isinstance(data, str):
+        return fields.Email
+    if isinstance(data, dict):
+        return fields.Dict(keys=fields.Str, values=fields.Dict(values=fields.Int))
+
+    raise TypeError('Could not detect type. '
+                    'Are you sure this is a positions or an email?')
+
+
+def fuzzy_pos_schema_selector_by_type(_, parent):
+    type_str = parent.get('type')
+    if type_str == 'str':
+        return fields.Email
+    elif type_str == 'dict':
+        return fields.Dict(keys=fields.Str, values=fields.Dict(values=fields.Int))
+
+    raise TypeError('Could not detect type. '
+                    'Are you sure that "type" value in ("str", "dict")?')

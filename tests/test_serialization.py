@@ -7,6 +7,8 @@ from tests.shapes import (
     Triangle,
     shape_schema_serialization_disambiguation,
     shape_schema_deserialization_disambiguation,
+    fuzzy_pos_schema_selector,
+    fuzzy_pos_schema_selector_by_type,
 )
 from tests.polyclasses import ShapePolyField, with_all
 
@@ -99,3 +101,39 @@ def test_serializing_polyfield_by_parent_type(field):
     rect_dict = field.serialize('shape', marshmallow_sticker)
 
     assert rect_dict == {"length": 4, "width": 10, "color": "blue"}
+
+
+def test_serializing_polyfield_dict():
+
+    class FuzzyPosSchema(Schema):
+        data = PolyField(
+            deserialization_schema_selector=fuzzy_pos_schema_selector,
+            serialization_schema_selector=fuzzy_pos_schema_selector,
+            many=True
+        )
+
+    positions = {"one": {'x': 1, 'y': 1}, "two": {'x': 100, 'y': 50}}
+    email = 'dummy@example.com'
+    expected_data = {'data': [email, positions]}
+
+    data = FuzzyPosSchema().dump({'data': [email, positions]})
+
+    assert data == expected_data
+
+    class FuzzyPosSchema(Schema):
+        type = fields.Str(required=True)
+        data = PolyField(
+            deserialization_schema_selector=fuzzy_pos_schema_selector_by_type,
+            serialization_schema_selector=fuzzy_pos_schema_selector_by_type,
+        )
+
+    expected_data = {'type': 'str', 'data': 'fixed'}
+
+    data = FuzzyPosSchema().dump({'type': 'str', 'data': 'fixed'})
+    assert data == expected_data
+
+    positions = {"one": {'x': 1, 'y': 1}, "two": {'x': 100, 'y': 50}}
+    expected_data = {'type': 'dict', 'data': positions}
+
+    data = FuzzyPosSchema().dump({'type': 'dict', 'data': positions})
+    assert data == expected_data
