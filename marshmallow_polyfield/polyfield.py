@@ -1,4 +1,5 @@
 import abc
+import contextlib
 
 from marshmallow import Schema, ValidationError
 from marshmallow.fields import Field
@@ -66,13 +67,20 @@ class PolyFieldBase(Field, metaclass=abc.ABCMeta):
                 res = []
                 for v in value:
                     schema = self.serialization_schema_selector(v, obj)
-                    schema.context.update(getattr(self, 'context', {}))
-                    res.append(schema.dump(v))
+                    if isinstance(schema, type):
+                        schema = schema()
+                    with contextlib.suppress(AttributeError, TypeError):
+                        schema.context.update(getattr(self, 'context', {}))
+                    serialized = schema.dump(v) if hasattr(schema, 'dump') else schema._serialize(v, None, None)
+                    res.append(serialized)
                 return res
             else:
                 schema = self.serialization_schema_selector(value, obj)
-                schema.context.update(getattr(self, 'context', {}))
-                return schema.dump(value)
+                if isinstance(schema, type):
+                    schema = schema()
+                with contextlib.suppress(AttributeError, TypeError):
+                    schema.context.update(getattr(self, 'context', {}))
+                return schema.dump(value) if hasattr(schema, 'dump') else schema._serialize(value, None, None)
         except Exception as err:
             raise TypeError(
                 'Failed to serialize object. Error: {0}\n'
